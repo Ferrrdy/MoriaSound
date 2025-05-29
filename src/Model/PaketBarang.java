@@ -1,3 +1,5 @@
+package Model;
+
 public class PaketBarang {
     private int idPaketBarang;
     private int idPaket;

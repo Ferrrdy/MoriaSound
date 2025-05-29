@@ -1,3 +1,5 @@
+package Model;
+
 public class CrewEvent {
     private int idCrewEvent;
     private int idEvent;
