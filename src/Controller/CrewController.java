@@ -1,174 +1,157 @@
 package Controller;
 
-import Model.Crew; // Pastikan Model.Crew dapat diakses
-import java.math.BigDecimal;
+import DataBase.DbConnection;
+import Model.Crew;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-
-
 
 public class CrewController {
 
-   
-    private List<Crew> daftarCrew;
-    private int nextIdCrew; // Untuk auto-increment ID sederhana
+    // Metode untuk menambahkan crew baru ke database
+    public static boolean addCrew(Crew crew) {
+        String sql = "INSERT INTO crew (nama_crew, posisi, gaji_bulanan, created_at, updated_at) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DbConnection.getConnection(); // Pastikan DbConnection.getConnection() mengembalikan Connection
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-    
-    public CrewController() {
-        this.daftarCrew = new ArrayList<>();
-        this.nextIdCrew = 1; // ID dimulai dari 1
-       
-    }
+            pstmt.setString(1, crew.getNamaCrew());
+            pstmt.setString(2, crew.getPosisi());
+            pstmt.setDouble(3, crew.getGajiBulanan());
 
-    /**
-     * Menambahkan crew baru ke dalam daftar.
-     *
-     * @param namaCrew Nama dari crew.
-     * @param posisi Posisi dari crew.
-     * @param gajiBulanan Gaji bulanan crew.
-     * @return Objek Crew yang baru dibuat dan ditambahkan.
-     */
-    public Crew tambahCrew(String namaCrew, String posisi, BigDecimal gajiBulanan) {
-        Date currentDate = new Date();
-        Crew crewBaru = new Crew();
-        crewBaru.setIdCrew(nextIdCrew++); // Tetapkan ID dan increment untuk ID berikutnya
-        crewBaru.setNamaCrew(namaCrew);
-        crewBaru.setPosisi(posisi);
-        crewBaru.setGajiBulanan(gajiBulanan);
-        crewBaru.setCreatedAt(currentDate); // Tetapkan waktu pembuatan
-        crewBaru.setUpdatedAt(currentDate); // Tetapkan waktu pembaruan awal sama dengan waktu pembuatan
+            // Set created_at dan updated_at saat ini di controller
+            LocalDateTime now = LocalDateTime.now();
+            pstmt.setTimestamp(4, Timestamp.valueOf(now));
+            pstmt.setTimestamp(5, Timestamp.valueOf(now));
 
-        this.daftarCrew.add(crewBaru);
-        System.out.println("Crew berhasil ditambahkan: " + namaCrew + " (ID: " + crewBaru.getIdCrew() + ")");
-        return crewBaru;
-    }
+            int rowsAffected = pstmt.executeUpdate();
 
-    /**
-     * Mendapatkan semua data crew.
-     *
-     * @return List dari semua objek Crew.
-     */
-    public List<Crew> getAllCrew() {
-        if (daftarCrew.isEmpty()) {
-            System.out.println("Tidak ada data crew.");
-        }
-        return new ArrayList<>(this.daftarCrew); // Mengembalikan salinan untuk mencegah modifikasi eksternal
-    }
-
-    /**
-     * Mendapatkan data crew berdasarkan ID.
-     *
-     * @param idCrew ID dari crew yang dicari.
-     * @return Optional yang berisi objek Crew jika ditemukan, atau Optional.empty() jika tidak.
-     */
-    public Optional<Crew> getCrewById(int idCrew) {
-        return this.daftarCrew.stream()
-                .filter(crew -> crew.getIdCrew() == idCrew)
-                .findFirst();
-    }
-
-    /**
-     * Memperbarui data crew yang sudah ada.
-     *
-     * @param idCrew ID dari crew yang akan diperbarui.
-     * @param namaCrewBaru Nama baru untuk crew (null jika tidak ingin diubah).
-     * @param posisiBaru Posisi baru untuk crew (null jika tidak ingin diubah).
-     * @param gajiBulananBaru Gaji bulanan baru untuk crew (null jika tidak ingin diubah).
-     * @return true jika pembaruan berhasil, false jika crew tidak ditemukan.
-     */
-    public boolean updateCrew(int idCrew, String namaCrewBaru, String posisiBaru, BigDecimal gajiBulananBaru) {
-        Optional<Crew> crewOptional = getCrewById(idCrew);
-        if (crewOptional.isPresent()) {
-            Crew crewUntukUpdate = crewOptional.get();
-            boolean updated = false;
-
-            if (namaCrewBaru != null && !namaCrewBaru.isEmpty()) {
-                crewUntukUpdate.setNamaCrew(namaCrewBaru);
-                updated = true;
-            }
-            if (posisiBaru != null && !posisiBaru.isEmpty()) {
-                crewUntukUpdate.setPosisi(posisiBaru);
-                updated = true;
-            }
-            if (gajiBulananBaru != null) {
-                crewUntukUpdate.setGajiBulanan(gajiBulananBaru);
-                updated = true;
-            }
-
-            if (updated) {
-                crewUntukUpdate.setUpdatedAt(new Date()); // Perbarui timestamp updatedAt
-                System.out.println("Crew dengan ID " + idCrew + " berhasil diperbarui.");
+            if (rowsAffected > 0) {
+                // Mendapatkan ID yang dihasilkan jika ada
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        crew.setIdCrew(generatedKeys.getInt(1));
+                    }
+                }
+                // Set createdAt dan updatedAt pada objek Crew setelah berhasil disimpan
+                crew.setCreatedAt(now);
+                crew.setUpdatedAt(now);
+                System.out.println("Crew added successfully: " + crew.getNamaCrew());
                 return true;
-            } else {
-                System.out.println("Tidak ada perubahan data untuk crew dengan ID " + idCrew + ".");
-                return false; // Tidak ada field yang diupdate
             }
-        } else {
-            System.out.println("Gagal memperbarui: Crew dengan ID " + idCrew + " tidak ditemukan.");
-            return false;
+        } catch (SQLException e) {
+            System.err.println("Error adding crew: " + e.getMessage());
+            e.printStackTrace();
         }
+        return false;
     }
 
-    /**
-     * Menghapus crew berdasarkan ID.
-     *
-     * @param idCrew ID dari crew yang akan dihapus.
-     * @return true jika penghapusan berhasil, false jika crew tidak ditemukan.
-     */
-    public boolean hapusCrew(int idCrew) {
-        boolean isRemoved = this.daftarCrew.removeIf(crew -> crew.getIdCrew() == idCrew);
-        if (isRemoved) {
-            System.out.println("Crew dengan ID " + idCrew + " berhasil dihapus.");
-        } else {
-            System.out.println("Gagal menghapus: Crew dengan ID " + idCrew + " tidak ditemukan.");
+    // Metode untuk mendapatkan semua kru dari database
+    public static List<Crew> getAllCrew() {
+        List<Crew> crews = new ArrayList<>();
+        String sql = "SELECT id_crew, nama_crew, posisi, gaji_bulanan, created_at, updated_at FROM crew";
+        try (Connection conn = DbConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                int id = rs.getInt("id_crew");
+                String nama = rs.getString("nama_crew");
+                String posisi = rs.getString("posisi");
+                double gaji = rs.getDouble("gaji_bulanan");
+
+                Timestamp createdAtTimestamp = rs.getTimestamp("created_at");
+                Timestamp updatedAtTimestamp = rs.getTimestamp("updated_at");
+
+                LocalDateTime createdAt = (createdAtTimestamp != null) ? createdAtTimestamp.toLocalDateTime() : null;
+                LocalDateTime updatedAt = (updatedAtTimestamp != null) ? updatedAtTimestamp.toLocalDateTime() : null;
+
+                // Menggunakan konstruktor baru dengan 6 argumen
+                crews.add(new Crew(id, nama, posisi, gaji, createdAt, updatedAt));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching all crews: " + e.getMessage());
+            e.printStackTrace();
+            return null; // Kembalikan null jika ada error
         }
-        return isRemoved;
+        return crews;
     }
 
-    /**
-     * Metode main untuk demonstrasi fungsionalitas CrewController.
-     * @param args Argumen command line (tidak digunakan).
-     */
-    public static void main(String[] args) {
-        CrewController controller = new CrewController();
+    // Metode untuk mendapatkan kru berdasarkan ID
+    public static Crew getCrewById(int idCrew) {
+        String sql = "SELECT id_crew, nama_crew, posisi, gaji_bulanan, created_at, updated_at FROM crew WHERE id_crew = ?";
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idCrew);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int id = rs.getInt("id_crew");
+                    String nama = rs.getString("nama_crew");
+                    String posisi = rs.getString("posisi");
+                    double gaji = rs.getDouble("gaji_bulanan");
 
-        System.out.println("--- Menambahkan Crew ---");
-        Crew crew1 = controller.tambahCrew("Budi Perkasa", "Nahkoda", new BigDecimal("30000000"));
-        Crew crew2 = controller.tambahCrew("Siti Aminah", "Juru Masak", new BigDecimal("15000000"));
-        controller.tambahCrew("Agus Setiawan", "Mekanik", new BigDecimal("22000000"));
+                    Timestamp createdAtTimestamp = rs.getTimestamp("created_at");
+                    Timestamp updatedAtTimestamp = rs.getTimestamp("updated_at");
 
-        System.out.println("\n--- Menampilkan Semua Crew ---");
-        controller.getAllCrew().forEach(crew ->
-            System.out.println("ID: " + crew.getIdCrew() + ", Nama: " + crew.getNamaCrew() +
-                               ", Posisi: " + crew.getPosisi() + ", Gaji: " + crew.getGajiBulanan() +
-                               ", Dibuat: " + crew.getCreatedAt() + ", Diperbarui: " + crew.getUpdatedAt())
-        );
+                    LocalDateTime createdAt = (createdAtTimestamp != null) ? createdAtTimestamp.toLocalDateTime() : null;
+                    LocalDateTime updatedAt = (updatedAtTimestamp != null) ? updatedAtTimestamp.toLocalDateTime() : null;
 
-        System.out.println("\n--- Mencari Crew dengan ID " + crew1.getIdCrew() + " ---");
-        Optional<Crew> foundCrew = controller.getCrewById(crew1.getIdCrew());
-        foundCrew.ifPresent(crew -> System.out.println("Ditemukan: " + crew.getNamaCrew()));
+                    // Menggunakan konstruktor baru dengan 6 argumen
+                    return new Crew(id, nama, posisi, gaji, createdAt, updatedAt);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching crew by ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-        System.out.println("\n--- Memperbarui Crew dengan ID " + crew2.getIdCrew() + " ---");
-        controller.updateCrew(crew2.getIdCrew(), "Siti Aminah Updated", "Kepala Juru Masak", new BigDecimal("17000000"));
-        controller.getCrewById(crew2.getIdCrew()).ifPresent(crew ->
-            System.out.println("Setelah Update - Nama: " + crew.getNamaCrew() + ", Posisi: " + crew.getPosisi() + ", Gaji: " + crew.getGajiBulanan())
-        );
+    // Metode untuk memperbarui data kru di database
+    public static boolean updateCrew(Crew crew) {
+        String sql = "UPDATE crew SET nama_crew = ?, posisi = ?, gaji_bulanan = ?, updated_at = ? WHERE id_crew = ?";
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, crew.getNamaCrew());
+            pstmt.setString(2, crew.getPosisi());
+            pstmt.setDouble(3, crew.getGajiBulanan());
+            pstmt.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now())); // Update updated_at
+            pstmt.setInt(5, crew.getIdCrew());
 
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Crew updated successfully: " + crew.getNamaCrew());
+                return true;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error updating crew: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
 
-        System.out.println("\n--- Menghapus Crew dengan ID " + crew1.getIdCrew() + " ---");
-        controller.hapusCrew(crew1.getIdCrew());
+    // Metode untuk menghapus kru dari database
+    public static boolean deleteCrew(int idCrew) {
+        String sql = "DELETE FROM crew WHERE id_crew = ?";
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idCrew);
 
-        System.out.println("\n--- Menampilkan Semua Crew Setelah Perubahan ---");
-        controller.getAllCrew().forEach(crew ->
-            System.out.println("ID: " + crew.getIdCrew() + ", Nama: " + crew.getNamaCrew() + ", Posisi: " + crew.getPosisi())
-        );
-
-        System.out.println("\n--- Mencoba mencari crew yang sudah dihapus (ID: " + crew1.getIdCrew() + ") ---");
-        controller.getCrewById(crew1.getIdCrew()).ifPresentOrElse(
-            crew -> System.out.println("Ditemukan: " + crew.getNamaCrew()),
-            () -> System.out.println("Crew dengan ID " + crew1.getIdCrew() + " tidak ditemukan.")
-        );
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Crew with ID " + idCrew + " deleted successfully.");
+                return true;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error deleting crew: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
     }
 }
