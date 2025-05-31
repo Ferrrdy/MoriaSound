@@ -11,7 +11,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.PreparedStatement;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -53,31 +52,6 @@ int xMouse, yMouse;
     jTable1.setModel(model);
     DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
     centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-
-    String sql = "SELECT id_armada, nama_armada, status, created_at, updated_at FROM armada ORDER BY id_armada ASC";
-    try (Connection conn = DbConnection.getConnection();
-         Statement stmt = conn.createStatement();
-         ResultSet rs = stmt.executeQuery(sql)) {
-
-        // model.setRowCount(0); // Tidak wajib jika model selalu baru, tapi tidak masalah jika ada.
-        int rowCount = 0; // DEBUG COUNTER
-        while (rs.next()) {
-            model.addRow(new Object[]{
-                false,
-                rs.getInt("id_armada"),
-                rs.getString("nama_armada"),
-                rs.getString("status"),
-                rs.getTimestamp("created_at"),
-                rs.getTimestamp("updated_at")
-            });
-            rowCount++; // DEBUG COUNTER
-        }
-        System.out.println("DaftarArmada: Jumlah baris yang dimuat ke tabel: " + rowCount); // DEBUG AKHIR LOOP
-    } catch (SQLException e) {
-        JOptionPane.showMessageDialog(this, "Gagal memuat data armada: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
-        e.printStackTrace();
-        System.err.println("DaftarArmada: SQLException dalam loadTableArmada(): " + e.getMessage()); // DEBUG ERROR
-    }
 
 // Kolom yang rata tengah (kecuali 0 = checkbox, 2 = nama, 4 & 5 = created/updated)
 for (int i = 1; i < jTable1.getColumnCount(); i++) {
@@ -139,6 +113,7 @@ for (int i = 1; i < jTable1.getColumnCount(); i++) {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
+        setPreferredSize(new java.awt.Dimension(1320, 720));
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -170,20 +145,10 @@ for (int i = 1; i < jTable1.getColumnCount(); i++) {
         jButton4.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
         jButton4.setForeground(new java.awt.Color(46, 51, 55));
         jButton4.setText("Tambah");
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
-            }
-        });
 
         jButton3.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
         jButton3.setForeground(new java.awt.Color(46, 51, 55));
         jButton3.setText("Edit");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
-            }
-        });
 
         jButton1.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
         jButton1.setForeground(new java.awt.Color(46, 51, 55));
@@ -395,7 +360,8 @@ for (int i = 1; i < jTable1.getColumnCount(); i++) {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jLabel3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                         .addGap(3, 3, 3)
                         .addComponent(roundedPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGap(0, 0, 0))
@@ -416,75 +382,7 @@ for (int i = 1; i < jTable1.getColumnCount(); i++) {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        System.out.println("DaftarArmada: Tombol Hapus Armada diklik.");
-        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-        java.util.ArrayList<Integer> idsToDelete = new java.util.ArrayList<>();
 
-        for (int i = 0; i < model.getRowCount(); i++) {
-            Boolean isSelected = (Boolean) model.getValueAt(i, 0);
-            if (isSelected != null && isSelected) {
-                idsToDelete.add((Integer) model.getValueAt(i, 1)); // Kolom 1 adalah ID Armada
-            }
-        }
-
-        if (idsToDelete.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Pilih setidaknya satu armada untuk dihapus.", "Peringatan", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "Apakah Anda yakin ingin menghapus " + idsToDelete.size() + " armada yang dipilih?",
-                "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
-
-        if (confirm == JOptionPane.YES_OPTION) {
-            String sql = "DELETE FROM armada WHERE id_armada = ?";
-            int successfulDeletes = 0;
-            Connection conn = null;
-            PreparedStatement pstmt = null;
-
-            try {
-                conn = DbConnection.getConnection();
-                conn.setAutoCommit(false); // Mulai transaksi
-                pstmt = conn.prepareStatement(sql);
-
-                for (Integer idArmada : idsToDelete) {
-                    pstmt.setInt(1, idArmada);
-                    pstmt.addBatch();
-                }
-                
-                int[] batchResults = pstmt.executeBatch();
-                conn.commit(); // Commit transaksi
-
-                for (int result : batchResults) {
-                    if (result >= 0 || result == PreparedStatement.SUCCESS_NO_INFO) {
-                        successfulDeletes++;
-                    }
-                }
-                
-                if (successfulDeletes > 0) {
-                    JOptionPane.showMessageDialog(this, successfulDeletes + " armada berhasil dihapus.", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Tidak ada armada yang dihapus.", "Informasi", JOptionPane.INFORMATION_MESSAGE);
-                }
-            } catch (SQLException e) {
-                if (conn != null) {
-                    try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
-                }
-                JOptionPane.showMessageDialog(this, "Gagal menghapus armada: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
-            } finally {
-                try {
-                    if (pstmt != null) pstmt.close();
-                    if (conn != null) {
-                        conn.setAutoCommit(true); // Kembalikan auto-commit
-                        conn.close();
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                loadTableArmada(); // Refresh tabel
-            }
-        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jLabel8MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel8MouseClicked
@@ -526,62 +424,6 @@ for (int i = 1; i < jTable1.getColumnCount(); i++) {
         crew.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_jButton33ActionPerformed
-
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        System.out.println("DaftarArmada: Tombol Edit Armada diklik.");
-        int selectedRow = -1;
-        int selectedRowCount = 0;
-        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-
-        for (int i = 0; i < model.getRowCount(); i++) {
-            if ((Boolean) model.getValueAt(i, 0)) { // Cek checkbox "Select"
-                selectedRowCount++;
-                selectedRow = i;
-            }
-        }
-
-        if (selectedRowCount == 0) {
-            JOptionPane.showMessageDialog(this, "Pilih satu armada untuk diedit.", "Peringatan", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        if (selectedRowCount > 1) {
-            JOptionPane.showMessageDialog(this, "Hanya bisa mengedit satu armada dalam satu waktu.", "Peringatan", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        // Ambil data dari baris yang dipilih
-        // Indeks: 1 (ID), 2 (Nama), 3 (Status)
-        int idArmada = (Integer) model.getValueAt(selectedRow, 1);
-        String namaArmada = (String) model.getValueAt(selectedRow, 2);
-        String statusArmada = (String) model.getValueAt(selectedRow, 3);
-
-        FormKelolaArmada formEdit = new FormKelolaArmada(this, true, idArmada, namaArmada, statusArmada);
-        formEdit.setVisible(true);
-
-        // Setelah form ditutup, cek statusnya
-        System.out.println("DaftarArmada: FormKelolaArmada (Edit) ditutup. DBOperationSuccess = " + formEdit.isDBOperationSuccess()); // DEBUG
-        if (formEdit.isDBOperationSuccess()) {
-            System.out.println("DaftarArmada: Operasi DB sukses, memanggil loadTableArmada()..."); // DEBUG
-            loadTableArmada();
-        } else {
-            System.out.println("DaftarArmada: Operasi DB TIDAK sukses, loadTableArmada() TIDAK dipanggil."); // DEBUG
-        }
-    }//GEN-LAST:event_jButton3ActionPerformed
-
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        System.out.println("DaftarArmada: Tombol Tambah Armada diklik.");
-        FormKelolaArmada formTambah = new FormKelolaArmada(this, true);
-        formTambah.setVisible(true);
-
-        // Setelah form ditutup, cek statusnya
-        System.out.println("DaftarArmada: FormKelolaArmada (Tambah) ditutup. DBOperationSuccess = " + formTambah.isDBOperationSuccess()); // DEBUG
-        if (formTambah.isDBOperationSuccess()) {
-            System.out.println("DaftarArmada: Operasi DB sukses, memanggil loadTableArmada()..."); // DEBUG
-            loadTableArmada();
-        } else {
-            System.out.println("DaftarArmada: Operasi DB TIDAK sukses, loadTableArmada() TIDAK dipanggil."); // DEBUG
-        }
-    }//GEN-LAST:event_jButton4ActionPerformed
 
     /**
      * @param args the command line arguments

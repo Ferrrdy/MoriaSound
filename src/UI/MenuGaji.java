@@ -15,6 +15,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import java.text.ParseException; // Import untuk parsing tanggal
+import java.text.SimpleDateFormat; // Import untuk format tanggal
+import java.util.Date; // Import Date dari java.util
+
 /**
  *
  * @author nabil
@@ -29,57 +33,92 @@ int xMouse, yMouse;
         setLocationRelativeTo(null);
         setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 50, 50));
     
-        loadTableGaji(); // Panggil fungsi untuk load data ke tabel
+        loadTableGaji(); // Panggil fungsi untuk load konfigurasi tabel
+        populateTable(); // Panggil fungsi untuk mengisi data ke tabel
     }
 
+    // Metode untuk mengkonfigurasi tampilan tabel (kolom, lebar, renderer)
     private void loadTableGaji() {
-    String[] kolom = {"Select", "ID", "ID Crew", "Tanggal Gaji", "Jumlah Gaji", "Tanggal Pembayaran", "Keterangan", "Created At", "Updated At"};
-    DefaultTableModel model = new DefaultTableModel(null, kolom) {
-        @Override
-        public Class<?> getColumnClass(int column) {
-            return column == 0 ? Boolean.class : super.getColumnClass(column);
-        }
+        String[] kolom = {"Select", "ID", "ID Crew", "Tanggal Gaji", "Jumlah Gaji","Bonus", "Tanggal Pembayaran", "Keterangan", "Created At", "Updated At"};
+        DefaultTableModel model = new DefaultTableModel(null, kolom) {
+            @Override
+            public Class<?> getColumnClass(int column) {
+                return column == 0 ? Boolean.class : super.getColumnClass(column);
+            }
 
-        @Override
-        public boolean isCellEditable(int row, int column) {
-            return column == 0; // hanya kolom checkbox yang editable
-        }
-    };
-    jTable1.setModel(model);
-    DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-    centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                // Hanya kolom "Select" yang editable untuk pemilihan
+                // Jika ingin membuat sel tertentu editable langsung, ubah di sini
+                return column == 0; 
+            }
+        };
+        jTable1.setModel(model);
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
 
-// Kolom yang rata tengah (kecuali 0 = checkbox, 7 & 8 = created/updated)
-for (int i = 1; i < jTable1.getColumnCount(); i++) {
-    if (i != 7 && i != 8) {
-        jTable1.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        // Kolom yang rata tengah (kecuali 0 = checkbox, 7 & 8 = created/updated)
+        for (int i = 1; i < jTable1.getColumnCount(); i++) {
+            if (i != 7 && i != 8) { // Kolom keterangan dan created/updated mungkin lebih baik rata kiri
+                jTable1.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+            }
+        }
+        // Set warna latar belakang tabel jadi putih
+        jTable1.setBackground(Color.WHITE);
+
+        // Set tampilan header kolom
+        JTableHeader header = jTable1.getTableHeader();
+        header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
+        ((DefaultTableCellRenderer) header.getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
+
+
+        TableColumnModel columnModel = jTable1.getColumnModel();
+        TableColumn selectColumn = columnModel.getColumn(0);
+        selectColumn.setPreferredWidth(50);
+        selectColumn.setMaxWidth(50);
+        selectColumn.setMinWidth(50);
+        selectColumn.setResizable(false);     // Checkbox
+        columnModel.getColumn(1).setPreferredWidth(30);   // ID
+        columnModel.getColumn(2).setPreferredWidth(100);  // ID Crew
+        columnModel.getColumn(3).setPreferredWidth(80);   // Tanggal Gaji
+        columnModel.getColumn(4).setPreferredWidth(120);  // Jumlah Gaji
+        columnModel.getColumn(5).setPreferredWidth(120);  // Bonus
+        columnModel.getColumn(6).setPreferredWidth(150);  // Tanggal Pembayaran
+        columnModel.getColumn(7).setPreferredWidth(150);  // Keterangan
+        columnModel.getColumn(8).setPreferredWidth(150);  // Created At
+        columnModel.getColumn(9).setPreferredWidth(150);  // Updated At
     }
-}
-    // Set warna latar belakang tabel jadi putih
-jTable1.setBackground(Color.WHITE);
 
-// Set tampilan header kolom
-JTableHeader header = jTable1.getTableHeader();
-header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
-((DefaultTableCellRenderer) header.getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
+    // Fungsi untuk mengisi data ke tabel dari database
+    public void populateTable() { // Ubah aksesibilitas menjadi public agar bisa dipanggil dari luar
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0); // Kosongkan tabel sebelum mengisi ulang
 
+        String query = "SELECT id_gaji, id_crew, tanggal_gaji, jumlah_gaji, bonus, tanggal_pembayaran, keterangan, created_at, updated_at FROM gaji ORDER BY created_at DESC"; // Ambil semua data dari tabel gaji
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query);
+             ResultSet rs = pst.executeQuery()) {
 
-    TableColumnModel columnModel = jTable1.getColumnModel();
-    TableColumn selectColumn = columnModel.getColumn(0);
-    selectColumn.setPreferredWidth(50);
-    selectColumn.setMaxWidth(50);
-    selectColumn.setMinWidth(50);
-    selectColumn.setResizable(false);    // Checkbox
-    columnModel.getColumn(1).setPreferredWidth(30);   // ID
-    columnModel.getColumn(2).setPreferredWidth(100);  // ID Crew
-    columnModel.getColumn(3).setPreferredWidth(80);   // Tanggal Gaji
-    columnModel.getColumn(4).setPreferredWidth(120);  // Jumlah Gaji
-    columnModel.getColumn(5).setPreferredWidth(150);  // Tanggal Pembayaran
-    columnModel.getColumn(6).setPreferredWidth(150);  // Keterangan
-    columnModel.getColumn(7).setPreferredWidth(150);  // Created At
-    columnModel.getColumn(8).setPreferredWidth(150);  // Updated At
-}
-
+            while (rs.next()) {
+                Object[] row = new Object[10];
+                row[0] = false; // Kolom "Select" (checkbox)
+                row[1] = rs.getInt("id_gaji");
+                row[2] = rs.getString("id_crew");
+                row[3] = rs.getDate("tanggal_gaji");
+                row[4] = rs.getDouble("jumlah_gaji");
+                row[5] = rs.getDouble("bonus");
+                row[6] = rs.getDate("tanggal_pembayaran");
+                row[7] = rs.getString("keterangan");
+                row[8] = rs.getTimestamp("created_at");
+                row[9] = rs.getTimestamp("updated_at");
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error fetching data: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -93,9 +132,9 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
         roundedPanel5 = new Custom.RoundedPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
-        jButton4 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        jButtonTambah = new javax.swing.JButton(); // Mengganti nama jButton4
+        jButtonEdit = new javax.swing.JButton();   // Mengganti nama jButton3
+        jButtonHapus = new javax.swing.JButton();  // Mengganti nama jButton1
         roundedPanel8 = new Custom.RoundedPanel();
         jLabel8 = new javax.swing.JLabel();
         jButton30 = new javax.swing.JButton();
@@ -112,7 +151,6 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
-        setPreferredSize(new java.awt.Dimension(1320, 720));
         addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             public void mouseDragged(java.awt.event.MouseEvent evt) {
                 formMouseDragged(evt);
@@ -132,17 +170,17 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null, null, null}, // Tambah satu kolom untuk "Select"
+                {null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "ID", "ID Crew", "Tanggal Gaji", "Jumlah Gaji", "Tanggal Pembayaran", "Keterangan", "Created At", "Update At"
+                "Select", "ID", "ID Crew", "Tanggal Gaji", "Jumlah Gaji", "Bonus", "Tanggal Pembayaran", "Keterangan", "Created At", "Update At" // Tambah "Select" dan "Bonus"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false
+                true, false, false, false, false, false, false, false, false, false // Kolom "Select" bisa diedit
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -152,20 +190,33 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
         jTable1.setGridColor(new java.awt.Color(255, 255, 255));
         jScrollPane1.setViewportView(jTable1);
 
-        jButton4.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
-        jButton4.setForeground(new java.awt.Color(46, 51, 55));
-        jButton4.setText("Tambah");
-
-        jButton3.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
-        jButton3.setForeground(new java.awt.Color(46, 51, 55));
-        jButton3.setText("Edit");
-
-        jButton1.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
-        jButton1.setForeground(new java.awt.Color(46, 51, 55));
-        jButton1.setText("Hapus");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        // Tombol "Tambah" (sebelumnya jButton4)
+        jButtonTambah.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
+        jButtonTambah.setForeground(new java.awt.Color(46, 51, 55));
+        jButtonTambah.setText("Tambah");
+        jButtonTambah.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                jButtonTambahActionPerformed(evt); // Menambahkan aksi untuk tombol Tambah
+            }
+        });
+
+        // Tombol "Edit" (sebelumnya jButton3)
+        jButtonEdit.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
+        jButtonEdit.setForeground(new java.awt.Color(46, 51, 55));
+        jButtonEdit.setText("Edit");
+        jButtonEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonEditActionPerformed(evt); // Menambahkan aksi untuk tombol Edit
+            }
+        });
+
+        // Tombol "Hapus" (sebelumnya jButton1)
+        jButtonHapus.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
+        jButtonHapus.setForeground(new java.awt.Color(46, 51, 55));
+        jButtonHapus.setText("Hapus");
+        jButtonHapus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonHapusActionPerformed(evt); // Menggunakan nama yang lebih jelas
             }
         });
 
@@ -177,11 +228,11 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
                 .addContainerGap(24, Short.MAX_VALUE)
                 .addGroup(roundedPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(roundedPanel5Layout.createSequentialGroup()
-                        .addComponent(jButton4)
+                        .addComponent(jButtonTambah)
                         .addGap(12, 12, 12)
-                        .addComponent(jButton3)
+                        .addComponent(jButtonEdit)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton1))
+                        .addComponent(jButtonHapus))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 966, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(25, Short.MAX_VALUE))
         );
@@ -190,9 +241,9 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, roundedPanel5Layout.createSequentialGroup()
                 .addGap(16, 16, 16)
                 .addGroup(roundedPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton3)
-                    .addComponent(jButton4))
+                    .addComponent(jButtonHapus)
+                    .addComponent(jButtonEdit)
+                    .addComponent(jButtonTambah))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1))
         );
@@ -396,9 +447,232 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
     this.setLocation(evt.getXOnScreen() - xMouse, evt.getYOnScreen() - yMouse);
     }//GEN-LAST:event_formMouseDragged
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    // Aksi untuk tombol Hapus (sebelumnya jButton1ActionPerformed)
+    private void jButtonHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonHapusActionPerformed
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        int rowCount = model.getRowCount();
+        boolean anySelected = false;
+        
+        java.util.List<Integer> idsToDelete = new java.util.ArrayList<>();
+        for (int i = 0; i < rowCount; i++) {
+            Boolean isSelected = (Boolean) model.getValueAt(i, 0); // Kolom "Select" adalah kolom 0
+            if (isSelected != null && isSelected) {
+                idsToDelete.add((Integer) model.getValueAt(i, 1)); // Kolom "ID" adalah kolom 1
+                anySelected = true;
+            }
+        }
 
-    }//GEN-LAST:event_jButton1ActionPerformed
+        if (!anySelected) {
+            JOptionPane.showMessageDialog(this, "Pilih setidaknya satu gaji untuk dihapus.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this, "Apakah Anda yakin ingin menghapus gaji yang dipilih?", "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            try (Connection conn = DbConnection.getConnection()) {
+                String deleteQuery = "DELETE FROM gaji WHERE id_gaji = ?";
+                PreparedStatement pst = conn.prepareStatement(deleteQuery);
+                boolean success = true;
+                for (Integer id : idsToDelete) {
+                    pst.setInt(1, id);
+                    int affectedRows = pst.executeUpdate();
+                    if (affectedRows == 0) {
+                        success = false;
+                        JOptionPane.showMessageDialog(this, "Gagal menghapus gaji dengan ID: " + id, "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+                if (success) {
+                    JOptionPane.showMessageDialog(this, "Gaji berhasil dihapus.", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+                    populateTable(); // Refresh tabel setelah penghapusan
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "Error saat menghapus data: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
+    }//GEN-LAST:event_jButtonHapusActionPerformed
+
+    // Aksi untuk tombol Tambah
+    private void jButtonTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonTambahActionPerformed
+        // Logika untuk membuka form tambah gaji
+        // Karena Anda ingin tetap di UI yang sama, Anda bisa menggunakan JOptionPane untuk input
+        // atau membuat panel tersembunyi yang muncul.
+        // Untuk contoh ini, saya akan menggunakan JOptionPane.
+
+        // Meminta input untuk setiap field
+        String idCrew = JOptionPane.showInputDialog(this, "Masukkan ID Crew:");
+        if (idCrew == null || idCrew.trim().isEmpty()) return; // Jika dibatalkan atau kosong
+
+        String tanggalGajiStr = JOptionPane.showInputDialog(this, "Masukkan Tanggal Gaji (YYYY-MM-DD):");
+        if (tanggalGajiStr == null || tanggalGajiStr.trim().isEmpty()) return;
+        java.sql.Date tanggalGaji = null;
+        try {
+            tanggalGaji = new java.sql.Date(new SimpleDateFormat("yyyy-MM-dd").parse(tanggalGajiStr).getTime());
+        } catch (ParseException e) {
+            JOptionPane.showMessageDialog(this, "Format Tanggal Gaji salah. Gunakan YYYY-MM-DD.", "Error Format", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String jumlahGajiStr = JOptionPane.showInputDialog(this, "Masukkan Jumlah Gaji:");
+        if (jumlahGajiStr == null || jumlahGajiStr.trim().isEmpty()) return;
+        double jumlahGaji;
+        try {
+            jumlahGaji = Double.parseDouble(jumlahGajiStr);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Jumlah Gaji harus angka.", "Error Format", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        String bonusStr = JOptionPane.showInputDialog(this, "Masukkan Bonus:");
+        if (bonusStr == null || bonusStr.trim().isEmpty()) return;
+        double bonus;
+        try {
+            bonus = Double.parseDouble(bonusStr);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Bonus harus angka.", "Error Format", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String tanggalPembayaranStr = JOptionPane.showInputDialog(this, "Masukkan Tanggal Pembayaran (YYYY-MM-DD):");
+        if (tanggalPembayaranStr == null || tanggalPembayaranStr.trim().isEmpty()) return;
+        java.sql.Date tanggalPembayaran = null;
+        try {
+            tanggalPembayaran = new java.sql.Date(new SimpleDateFormat("yyyy-MM-dd").parse(tanggalPembayaranStr).getTime());
+        } catch (ParseException e) {
+            JOptionPane.showMessageDialog(this, "Format Tanggal Pembayaran salah. Gunakan YYYY-MM-DD.", "Error Format", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String keterangan = JOptionPane.showInputDialog(this, "Masukkan Keterangan:");
+        if (keterangan == null) keterangan = ""; // Jika dibatalkan, set kosong
+
+        // Lakukan insert ke database
+        try (Connection conn = DbConnection.getConnection()) {
+            String sql = "INSERT INTO gaji (id_crew, tanggal_gaji, jumlah_gaji, bonus, tanggal_pembayaran, keterangan) VALUES (?, ?, ?, ?, ?, ?)";
+            PreparedStatement pst = conn.prepareStatement(sql);
+            pst.setString(1, idCrew);
+            pst.setDate(2, tanggalGaji);
+            pst.setDouble(3, jumlahGaji);
+            pst.setDouble(4, bonus);
+            pst.setDate(5, tanggalPembayaran);
+            pst.setString(6, keterangan);
+
+            int rowsAffected = pst.executeUpdate();
+            if (rowsAffected > 0) {
+                JOptionPane.showMessageDialog(this, "Data gaji berhasil ditambahkan!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+                populateTable(); // Refresh tabel setelah penambahan
+            } else {
+                JOptionPane.showMessageDialog(this, "Gagal menambahkan data gaji.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error database: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_jButtonTambahActionPerformed
+
+    // Aksi untuk tombol Edit (Logika edit langsung di dalam MenuGaji)
+    private void jButtonEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonEditActionPerformed
+        int selectedRow = -1;
+        // Cari baris yang dicentang
+        for (int i = 0; i < jTable1.getRowCount(); i++) {
+            Boolean isSelected = (Boolean) jTable1.getValueAt(i, 0);
+            if (isSelected != null && isSelected) {
+                if (selectedRow != -1) { // Jika lebih dari satu baris dicentang
+                    JOptionPane.showMessageDialog(this, "Pilih hanya satu gaji untuk diedit.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                selectedRow = i;
+            }
+        }
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Pilih satu gaji untuk diedit.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Ambil data yang ada dari baris yang dipilih
+        int idGaji = (int) jTable1.getValueAt(selectedRow, 1);
+        String currentIdCrew = (String) jTable1.getValueAt(selectedRow, 2);
+        Date currentTanggalGaji = (Date) jTable1.getValueAt(selectedRow, 3);
+        double currentJumlahGaji = (double) jTable1.getValueAt(selectedRow, 4);
+        double currentBonus = (double) jTable1.getValueAt(selectedRow, 5);
+        Date currentTanggalPembayaran = (Date) jTable1.getValueAt(selectedRow, 6);
+        String currentKeterangan = (String) jTable1.getValueAt(selectedRow, 7);
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        // Meminta input baru untuk setiap field
+        String newIdCrew = JOptionPane.showInputDialog(this, "Edit ID Crew:", currentIdCrew);
+        if (newIdCrew == null) return; // Jika dibatalkan
+
+        String newTanggalGajiStr = JOptionPane.showInputDialog(this, "Edit Tanggal Gaji (YYYY-MM-DD):", sdf.format(currentTanggalGaji));
+        if (newTanggalGajiStr == null) return;
+        java.sql.Date newTanggalGaji = null;
+        try {
+            newTanggalGaji = new java.sql.Date(sdf.parse(newTanggalGajiStr).getTime());
+        } catch (ParseException e) {
+            JOptionPane.showMessageDialog(this, "Format Tanggal Gaji salah. Gunakan YYYY-MM-DD.", "Error Format", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String newJumlahGajiStr = JOptionPane.showInputDialog(this, "Edit Jumlah Gaji:", String.valueOf(currentJumlahGaji));
+        if (newJumlahGajiStr == null) return;
+        double newJumlahGaji;
+        try {
+            newJumlahGaji = Double.parseDouble(newJumlahGajiStr);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Jumlah Gaji harus angka.", "Error Format", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String newBonusStr = JOptionPane.showInputDialog(this, "Edit Bonus:", String.valueOf(currentBonus));
+        if (newBonusStr == null) return;
+        double newBonus;
+        try {
+            newBonus = Double.parseDouble(newBonusStr);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Bonus harus angka.", "Error Format", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String newTanggalPembayaranStr = JOptionPane.showInputDialog(this, "Edit Tanggal Pembayaran (YYYY-MM-DD):", sdf.format(currentTanggalPembayaran));
+        if (newTanggalPembayaranStr == null) return;
+        java.sql.Date newTanggalPembayaran = null;
+        try {
+            newTanggalPembayaran = new java.sql.Date(sdf.parse(newTanggalPembayaranStr).getTime());
+        } catch (ParseException e) {
+            JOptionPane.showMessageDialog(this, "Format Tanggal Pembayaran salah. Gunakan YYYY-MM-DD.", "Error Format", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String newKeterangan = JOptionPane.showInputDialog(this, "Edit Keterangan:", currentKeterangan);
+        if (newKeterangan == null) newKeterangan = currentKeterangan; // Jika dibatalkan, gunakan nilai lama
+
+        // Lakukan update ke database
+        try (Connection conn = DbConnection.getConnection()) {
+            String sql = "UPDATE gaji SET id_crew = ?, tanggal_gaji = ?, jumlah_gaji = ?, bonus = ?, tanggal_pembayaran = ?, keterangan = ?, updated_at = CURRENT_TIMESTAMP WHERE id_gaji = ?";
+            PreparedStatement pst = conn.prepareStatement(sql);
+            pst.setString(1, newIdCrew);
+            pst.setDate(2, newTanggalGaji);
+            pst.setDouble(3, newJumlahGaji);
+            pst.setDouble(4, newBonus);
+            pst.setDate(5, newTanggalPembayaran);
+            pst.setString(6, newKeterangan);
+            pst.setInt(7, idGaji);
+
+            int rowsAffected = pst.executeUpdate();
+            if (rowsAffected > 0) {
+                JOptionPane.showMessageDialog(this, "Data gaji berhasil diperbarui!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+                populateTable(); // Refresh tabel setelah update
+            } else {
+                JOptionPane.showMessageDialog(this, "Gagal memperbarui data gaji.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error database: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_jButtonEditActionPerformed
+
 
     private void jLabel8MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel8MouseClicked
         BerandaBaru menu = new BerandaBaru();
@@ -476,15 +750,15 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButtonHapus; // Mengganti nama jButton1
     private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButtonEdit;   // Mengganti nama jButton3
     private javax.swing.JButton jButton30;
     private javax.swing.JButton jButton31;
     private javax.swing.JButton jButton32;
     private javax.swing.JButton jButton33;
     private javax.swing.JButton jButton34;
-    private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButtonTambah; // Mengganti nama jButton4
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
