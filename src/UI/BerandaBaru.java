@@ -62,10 +62,6 @@ int xMouse, yMouse;
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
-<<<<<<< HEAD
-=======
-        setPreferredSize(new java.awt.Dimension(1320, 720));
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a
         addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             public void mouseDragged(java.awt.event.MouseEvent evt) {
                 formMouseDragged(evt);

@@ -201,12 +201,6 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Tambah"/>
               </Properties>
-<<<<<<< HEAD
-=======
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton4ActionPerformed"/>
-              </Events>
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a
             </Component>
             <Component class="javax.swing.JButton" name="jButton3">
               <Properties>
@@ -218,12 +212,6 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Edit"/>
               </Properties>
-<<<<<<< HEAD
-=======
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton3ActionPerformed"/>
-              </Events>
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a
             </Component>
             <Component class="javax.swing.JButton" name="jButton1">
               <Properties>

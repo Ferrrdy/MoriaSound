@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a
 package Custom;
 
 import java.awt.*;
@@ -93,8 +89,4 @@ public class RoundedPanel extends JPanel {
         path.closePath();
         return path;
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a

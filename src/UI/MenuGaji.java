@@ -15,13 +15,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-<<<<<<< HEAD
 import java.text.ParseException; // Import untuk parsing tanggal
 import java.text.SimpleDateFormat; // Import untuk format tanggal
 import java.util.Date; // Import Date dari java.util
 
-=======
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a
 /**
  *
  * @author nabil
@@ -36,7 +33,6 @@ int xMouse, yMouse;
         setLocationRelativeTo(null);
         setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 50, 50));
     
-<<<<<<< HEAD
         loadTableGaji(); // Panggil fungsi untuk load konfigurasi tabel
         populateTable(); // Panggil fungsi untuk mengisi data ke tabel
     }
@@ -123,59 +119,6 @@ int xMouse, yMouse;
         }
     }
     
-=======
-        loadTableGaji(); // Panggil fungsi untuk load data ke tabel
-    }
-
-    private void loadTableGaji() {
-    String[] kolom = {"Select", "ID", "ID Crew", "Tanggal Gaji", "Jumlah Gaji", "Tanggal Pembayaran", "Keterangan", "Created At", "Updated At"};
-    DefaultTableModel model = new DefaultTableModel(null, kolom) {
-        @Override
-        public Class<?> getColumnClass(int column) {
-            return column == 0 ? Boolean.class : super.getColumnClass(column);
-        }
-
-        @Override
-        public boolean isCellEditable(int row, int column) {
-            return column == 0; // hanya kolom checkbox yang editable
-        }
-    };
-    jTable1.setModel(model);
-    DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-    centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-
-// Kolom yang rata tengah (kecuali 0 = checkbox, 7 & 8 = created/updated)
-for (int i = 1; i < jTable1.getColumnCount(); i++) {
-    if (i != 7 && i != 8) {
-        jTable1.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
-    }
-}
-    // Set warna latar belakang tabel jadi putih
-jTable1.setBackground(Color.WHITE);
-
-// Set tampilan header kolom
-JTableHeader header = jTable1.getTableHeader();
-header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
-((DefaultTableCellRenderer) header.getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
-
-
-    TableColumnModel columnModel = jTable1.getColumnModel();
-    TableColumn selectColumn = columnModel.getColumn(0);
-    selectColumn.setPreferredWidth(50);
-    selectColumn.setMaxWidth(50);
-    selectColumn.setMinWidth(50);
-    selectColumn.setResizable(false);    // Checkbox
-    columnModel.getColumn(1).setPreferredWidth(30);   // ID
-    columnModel.getColumn(2).setPreferredWidth(100);  // ID Crew
-    columnModel.getColumn(3).setPreferredWidth(80);   // Tanggal Gaji
-    columnModel.getColumn(4).setPreferredWidth(120);  // Jumlah Gaji
-    columnModel.getColumn(5).setPreferredWidth(150);  // Tanggal Pembayaran
-    columnModel.getColumn(6).setPreferredWidth(150);  // Keterangan
-    columnModel.getColumn(7).setPreferredWidth(150);  // Created At
-    columnModel.getColumn(8).setPreferredWidth(150);  // Updated At
-}
-
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -189,15 +132,9 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
         roundedPanel5 = new Custom.RoundedPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
-<<<<<<< HEAD
         jButtonTambah = new javax.swing.JButton(); // Mengganti nama jButton4
         jButtonEdit = new javax.swing.JButton();   // Mengganti nama jButton3
         jButtonHapus = new javax.swing.JButton();  // Mengganti nama jButton1
-=======
-        jButton4 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a
         roundedPanel8 = new Custom.RoundedPanel();
         jLabel8 = new javax.swing.JLabel();
         jButton30 = new javax.swing.JButton();
@@ -214,10 +151,6 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
-<<<<<<< HEAD
-=======
-        setPreferredSize(new java.awt.Dimension(1320, 720));
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a
         addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             public void mouseDragged(java.awt.event.MouseEvent evt) {
                 formMouseDragged(evt);
@@ -237,7 +170,6 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-<<<<<<< HEAD
                 {null, null, null, null, null, null, null, null, null, null}, // Tambah satu kolom untuk "Select"
                 {null, null, null, null, null, null, null, null, null, null},
                 {null, null, null, null, null, null, null, null, null, null},
@@ -249,19 +181,6 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
         ) {
             boolean[] canEdit = new boolean [] {
                 true, false, false, false, false, false, false, false, false, false // Kolom "Select" bisa diedit
-=======
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null}
-            },
-            new String [] {
-                "ID", "ID Crew", "Tanggal Gaji", "Jumlah Gaji", "Tanggal Pembayaran", "Keterangan", "Created At", "Update At"
-            }
-        ) {
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -271,7 +190,6 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
         jTable1.setGridColor(new java.awt.Color(255, 255, 255));
         jScrollPane1.setViewportView(jTable1);
 
-<<<<<<< HEAD
         // Tombol "Tambah" (sebelumnya jButton4)
         jButtonTambah.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
         jButtonTambah.setForeground(new java.awt.Color(46, 51, 55));
@@ -299,22 +217,6 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
         jButtonHapus.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonHapusActionPerformed(evt); // Menggunakan nama yang lebih jelas
-=======
-        jButton4.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
-        jButton4.setForeground(new java.awt.Color(46, 51, 55));
-        jButton4.setText("Tambah");
-
-        jButton3.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
-        jButton3.setForeground(new java.awt.Color(46, 51, 55));
-        jButton3.setText("Edit");
-
-        jButton1.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
-        jButton1.setForeground(new java.awt.Color(46, 51, 55));
-        jButton1.setText("Hapus");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a
             }
         });
 
@@ -326,19 +228,11 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
                 .addContainerGap(24, Short.MAX_VALUE)
                 .addGroup(roundedPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(roundedPanel5Layout.createSequentialGroup()
-<<<<<<< HEAD
                         .addComponent(jButtonTambah)
                         .addGap(12, 12, 12)
                         .addComponent(jButtonEdit)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButtonHapus))
-=======
-                        .addComponent(jButton4)
-                        .addGap(12, 12, 12)
-                        .addComponent(jButton3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton1))
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 966, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(25, Short.MAX_VALUE))
         );
@@ -347,15 +241,9 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, roundedPanel5Layout.createSequentialGroup()
                 .addGap(16, 16, 16)
                 .addGroup(roundedPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-<<<<<<< HEAD
                     .addComponent(jButtonHapus)
                     .addComponent(jButtonEdit)
                     .addComponent(jButtonTambah))
-=======
-                    .addComponent(jButton1)
-                    .addComponent(jButton3)
-                    .addComponent(jButton4))
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1))
         );
@@ -559,7 +447,6 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
     this.setLocation(evt.getXOnScreen() - xMouse, evt.getYOnScreen() - yMouse);
     }//GEN-LAST:event_formMouseDragged
 
-<<<<<<< HEAD
     // Aksi untuk tombol Hapus (sebelumnya jButton1ActionPerformed)
     private void jButtonHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonHapusActionPerformed
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
@@ -786,11 +673,6 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
         }
     }//GEN-LAST:event_jButtonEditActionPerformed
 
-=======
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-
-    }//GEN-LAST:event_jButton1ActionPerformed
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a
 
     private void jLabel8MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel8MouseClicked
         BerandaBaru menu = new BerandaBaru();
@@ -868,25 +750,15 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-<<<<<<< HEAD
     private javax.swing.JButton jButtonHapus; // Mengganti nama jButton1
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButtonEdit;   // Mengganti nama jButton3
-=======
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a
     private javax.swing.JButton jButton30;
     private javax.swing.JButton jButton31;
     private javax.swing.JButton jButton32;
     private javax.swing.JButton jButton33;
     private javax.swing.JButton jButton34;
-<<<<<<< HEAD
     private javax.swing.JButton jButtonTambah; // Mengganti nama jButton4
-=======
-    private javax.swing.JButton jButton4;
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
@@ -899,8 +771,4 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
     private Custom.RoundedPanel roundedPanel6;
     private Custom.RoundedPanel roundedPanel8;
     // End of variables declaration//GEN-END:variables
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> d4f208d108272a056b0886872f7aca31e7d6647a
