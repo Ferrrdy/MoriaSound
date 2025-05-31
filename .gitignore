@@ -1,0 +1,38 @@
+# ========== Java Compiled Files ==========
+*.class
+*.jar
+*.war
+*.ear
+
+# ========== Build Folders ==========
+build/
+dist/
+nbbuild/
+nbdist/
+.generated/
+
+# ========== NetBeans Specific Files ==========
+nbproject/private/
+.nb-gradle/
+.netbeans/
+
+# ========== OS Generated Files ==========
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+
+# ========== IDEs ==========
+*.iml
+.idea/
+.vscode/
+
+# ========== Logs and Misc ==========
+*.log
+*.tmp
+*.bak
+*.swp
+
+# ========== Backup Files ==========
+*~
+*.orig
