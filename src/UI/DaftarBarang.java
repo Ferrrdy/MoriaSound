@@ -34,7 +34,7 @@ int xMouse, yMouse;
         setLocationRelativeTo(null);
         setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 50, 50));
         
-    loadTableBarang(); // Panggil fungsi untuk load data ke tabel
+    loadTableBarang(); 
     }
 
     private void loadTableBarang() {
@@ -58,13 +58,11 @@ int xMouse, yMouse;
     
     String sql = "SELECT id_barang, nama_barang, id_kategori, kondisi, jumlah_total, jumlah_tersedia, created_at, updated_at FROM barang ORDER BY id_barang ASC";
 
-        try (Connection conn = DbConnection.getConnection(); // Mendapatkan koneksi dari DbConnection
+        try (Connection conn = DbConnection.getConnection(); 
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
-            // Looping untuk membaca setiap baris hasil query
             while (rs.next()) {
-                // Mengambil data dari setiap kolom di baris saat ini
                 boolean isSelected = false; // Default untuk checkbox
                 int idBarang = rs.getInt("id_barang");
                 String namaBarang = rs.getString("nama_barang");
@@ -75,24 +73,21 @@ int xMouse, yMouse;
                 Timestamp createdAt = rs.getTimestamp("created_at");
                 Timestamp updatedAt = rs.getTimestamp("updated_at");
 
-                // Menambahkan baris baru ke model tabel dengan data yang sudah diambil
                 model.addRow(new Object[]{isSelected, idBarang, namaBarang, idKategori, kondisi, jumlahTotal, jumlahTersedia, createdAt, updatedAt});
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Gagal memuat data barang dari database: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace(); // Mencetak stack trace error ke console untuk debugging
+            e.printStackTrace(); 
         }
 
-// Kolom yang rata tengah (kecuali 0 = checkbox, 2 = nama, 6 & 7 = created/updated)
 for (int i = 1; i < jTable1.getColumnCount(); i++) {
     if (i != 2 && i != 7 && i != 8) {
         jTable1.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
     }
 }
-    // Set warna latar belakang tabel jadi putih
+
 jTable1.setBackground(Color.WHITE);
 
-// Set tampilan header kolom
 JTableHeader header = jTable1.getTableHeader();
 header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
 ((DefaultTableCellRenderer) header.getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
@@ -184,7 +179,7 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
         });
         jScrollPane1.setViewportView(jTable1);
 
-        jButton4.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
+        jButton4.setFont(new java.awt.Font("SansSerif", 3, 12)); 
         jButton4.setForeground(new java.awt.Color(46, 51, 55));
         jButton4.setText("Tambah");
         jButton4.addActionListener(new java.awt.event.ActionListener() {
@@ -193,7 +188,7 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
             }
         });
 
-        jButton3.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
+        jButton3.setFont(new java.awt.Font("SansSerif", 3, 12)); 
         jButton3.setForeground(new java.awt.Color(46, 51, 55));
         jButton3.setText("Edit");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
@@ -202,7 +197,7 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
             }
         });
 
-        jButton1.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
+        jButton1.setFont(new java.awt.Font("SansSerif", 3, 12)); 
         jButton1.setForeground(new java.awt.Color(46, 51, 55));
         jButton1.setText("Hapus");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -242,7 +237,7 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
 
         roundedPanel9.setBackground(new java.awt.Color(46, 51, 55));
 
-        jLabel9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gambar/150 no back.png"))); // NOI18N
+        jLabel9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gambar/150 no back.png")));
         jLabel9.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel9MouseClicked(evt);
@@ -250,7 +245,7 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
         });
 
         jButton35.setBackground(new java.awt.Color(251, 200, 42));
-        jButton35.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
+        jButton35.setFont(new java.awt.Font("SansSerif", 3, 12)); 
         jButton35.setText("Kalender Event");
         jButton35.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         jButton35.addActionListener(new java.awt.event.ActionListener() {
@@ -260,7 +255,7 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
         });
 
         jButton36.setBackground(new java.awt.Color(251, 200, 42));
-        jButton36.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
+        jButton36.setFont(new java.awt.Font("SansSerif", 3, 12)); 
         jButton36.setText("Daftar Paket");
         jButton36.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         jButton36.addActionListener(new java.awt.event.ActionListener() {
@@ -270,7 +265,7 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
         });
 
         jButton37.setBackground(new java.awt.Color(251, 200, 42));
-        jButton37.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
+        jButton37.setFont(new java.awt.Font("SansSerif", 3, 12)); 
         jButton37.setText("Inventaris");
         jButton37.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         jButton37.addActionListener(new java.awt.event.ActionListener() {
@@ -280,7 +275,7 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
         });
 
         jButton38.setBackground(new java.awt.Color(251, 200, 42));
-        jButton38.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
+        jButton38.setFont(new java.awt.Font("SansSerif", 3, 12)); 
         jButton38.setText("Karyawan");
         jButton38.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         jButton38.addActionListener(new java.awt.event.ActionListener() {
@@ -290,7 +285,7 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
         });
 
         jButton39.setBackground(new java.awt.Color(251, 200, 42));
-        jButton39.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
+        jButton39.setFont(new java.awt.Font("SansSerif", 3, 12)); 
         jButton39.setText("Penggajian");
         jButton39.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         jButton39.addActionListener(new java.awt.event.ActionListener() {
@@ -339,7 +334,7 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
         roundedPanel6.setRoundBottomRight(25);
         roundedPanel6.setRoundTopRight(25);
 
-        jLabel10.setFont(new java.awt.Font("SansSerif", 3, 20)); // NOI18N
+        jLabel10.setFont(new java.awt.Font("SansSerif", 3, 20)); 
         jLabel10.setForeground(new java.awt.Color(251, 190, 1));
         jLabel10.setText("Moria Sound Lighting");
 
@@ -360,12 +355,12 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
                 .addContainerGap())
         );
 
-        jLabel3.setFont(new java.awt.Font("SansSerif", 3, 35)); // NOI18N
+        jLabel3.setFont(new java.awt.Font("SansSerif", 3, 35)); 
         jLabel3.setForeground(new java.awt.Color(46, 51, 55));
         jLabel3.setText("D A F T A R   B A R A N G");
 
         jButton2.setBackground(new java.awt.Color(251, 190, 1));
-        jButton2.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
+        jButton2.setFont(new java.awt.Font("SansSerif", 1, 18)); 
         jButton2.setText("X");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -430,13 +425,13 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
     }// </editor-fold>//GEN-END:initComponents
 
     private void formMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMousePressed
-        // Simpan posisi awal mouse saat diklik
+
     xMouse = evt.getX();
     yMouse = evt.getY();
     }//GEN-LAST:event_formMousePressed
 
     private void formMouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseDragged
-        // Geser window mengikuti pergerakan mouse
+
     this.setLocation(evt.getXOnScreen() - xMouse, evt.getYOnScreen() - yMouse);
     }//GEN-LAST:event_formMouseDragged
 
@@ -446,11 +441,10 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
        java.util.ArrayList<Integer> idsToDelete = new java.util.ArrayList<>();
 
-       // Kumpulkan ID barang dari baris yang checkbox "Select"-nya dicentang
        for (int i = 0; i < model.getRowCount(); i++) {
-           Boolean isSelected = (Boolean) model.getValueAt(i, 0); // Kolom 0 adalah checkbox "Select"
+           Boolean isSelected = (Boolean) model.getValueAt(i, 0); 
            if (isSelected != null && isSelected) {
-               idsToDelete.add((Integer) model.getValueAt(i, 1)); // Kolom 1 adalah ID Barang
+               idsToDelete.add((Integer) model.getValueAt(i, 1));
            }
        }
 
@@ -466,26 +460,24 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
        if (confirm == JOptionPane.YES_OPTION) {
            String sql = "DELETE FROM barang WHERE id_barang = ?";
            int successfulDeletes = 0;
-           Connection conn = null; // Deklarasikan di luar try-catch-finally agar bisa diakses di finally
+           Connection conn = null; 
            PreparedStatement pstmt = null;
 
            try {
                conn = DbConnection.getConnection();
-               // Penting untuk efisiensi jika menghapus banyak: nonaktifkan auto-commit
                conn.setAutoCommit(false); 
 
                pstmt = conn.prepareStatement(sql);
 
                for (Integer idBarang : idsToDelete) {
                    pstmt.setInt(1, idBarang);
-                   pstmt.addBatch(); // Tambahkan ke batch untuk eksekusi sekaligus
+                   pstmt.addBatch();
                }
 
-               int[] batchResults = pstmt.executeBatch(); // Eksekusi batch
-               conn.commit(); // Commit transaksi jika semua berhasil
-
+               int[] batchResults = pstmt.executeBatch(); 
+               conn.commit(); 
                for (int result : batchResults) {
-                   if (result >= 0 || result == PreparedStatement.SUCCESS_NO_INFO) { // SUCCESS_NO_INFO untuk beberapa driver jika jumlah baris tidak diketahui
+                   if (result >= 0 || result == PreparedStatement.SUCCESS_NO_INFO) { 
                        successfulDeletes++;
                    }
                }
@@ -500,7 +492,7 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
                if (conn != null) {
                    try {
                        System.err.println("Transaksi di-rollback karena error.");
-                       conn.rollback(); // Rollback jika terjadi error
+                       conn.rollback(); 
                    } catch (SQLException ex) {
                        ex.printStackTrace();
                    }
@@ -508,7 +500,6 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
                JOptionPane.showMessageDialog(this, "Gagal menghapus barang dari database: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
                e.printStackTrace();
            } finally {
-               // Pastikan PreparedStatement dan Connection ditutup
                if (pstmt != null) {
                    try {
                        pstmt.close();
@@ -518,13 +509,13 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
                }
                if (conn != null) {
                    try {
-                       conn.setAutoCommit(true); // Kembalikan ke mode auto-commit default
+                       conn.setAutoCommit(true); 
                        conn.close();
                    } catch (SQLException e) {
                        e.printStackTrace();
                    }
                }
-               loadTableBarang(); // Muat ulang tabel untuk menampilkan perubahan, baik berhasil maupun gagal (untuk refresh)
+               loadTableBarang(); 
            }
        }
     }//GEN-LAST:event_jButton1ActionPerformed
@@ -570,18 +561,15 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        System.out.println("DaftarBarang: Tombol Tambah diklik."); // Debugging
+        System.out.println("DaftarBarang: Tombol Tambah diklik."); 
 
-        // Membuat dan menampilkan form dalam mode TAMBAH.
-        // Pastikan nama kelasnya FormKelolaBarang atau sesuai dengan yang Anda buat.
-        FormKelolaBarang formKelola = new FormKelolaBarang(this, true); // Memanggil konstruktor mode Tambah
+        FormKelolaBarang formKelola = new FormKelolaBarang(this, true);
         formKelola.setVisible(true);
 
-        // Setelah formKelola ditutup, cek apakah operasi INSERT di dalamnya berhasil
-        System.out.println("DaftarBarang: FormKelolaBarang (Tambah) ditutup. Status DB Op Sukses: " + formKelola.isDBOperationSuccess()); // Debugging
+        System.out.println("DaftarBarang: FormKelolaBarang (Tambah) ditutup. Status DB Op Sukses: " + formKelola.isDBOperationSuccess());
         if (formKelola.isDBOperationSuccess()) {
-            loadTableBarang(); // Jika berhasil, muat ulang tabel untuk menampilkan data baru
-            System.out.println("DaftarBarang: Tabel dimuat ulang setelah tambah berhasil."); // Debugging
+            loadTableBarang(); 
+            System.out.println("DaftarBarang: Tabel dimuat ulang setelah tambah berhasil."); 
         }
     }//GEN-LAST:event_jButton4ActionPerformed
 
@@ -591,7 +579,7 @@ header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
         int selectedRow = -1;
         int selectedRowCount = 0;
         for (int i = 0; i < jTable1.getRowCount(); i++) {
-            if ((Boolean) jTable1.getValueAt(i, 0)) { // Cek checkbox
+            if ((Boolean) jTable1.getValueAt(i, 0)) {
                 selectedRowCount++;
                 selectedRow = i;
             }
