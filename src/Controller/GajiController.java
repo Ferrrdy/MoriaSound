@@ -1,4 +1,4 @@
-package Controller; // Sesuai struktur folder Anda
+package Controller;
 
 import Model.GajiModel;
 import DataBase.DbConnection; // Pastikan DbConnection ada di package DataBase
@@ -8,33 +8,48 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp; // Untuk created_at dan updated_at dari DB
+import java.sql.Timestamp; // Untuk created_at dan updated_at dari DB (DATETIME di MySQL)
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Date; // Untuk konversi ke java.util.Date jika diperlukan
+import java.util.Date; // Penting jika GajiModel menggunakan java.util.Date untuk tanggal
 
 public class GajiController {
 
     public boolean addGaji(GajiModel gaji) {
-        String sql = "INSERT INTO gaji (id_crew, tanggal_gaji, jumlah_gaji, bonus, tanggal_pembayaran, keterangan, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())";
+        // Menggunakan nama tabel "gaji"
+        // created_at dan updated_at akan diisi oleh default database (ON UPDATE CURRENT_TIMESTAMP)
+        String sql = "INSERT INTO gaji (id_crew, tanggal_gaji, jumlah_gaji, bonus, nomor_rekening, tanggal_pembayaran, keterangan) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, gaji.getId_crew());
-            // Konversi java.util.Date ke java.sql.Date
+            // id_crew adalah INT(11)
+            pstmt.setInt(1, gaji.getId_crew());
+
+            // tanggal_gaji adalah DATE
             if (gaji.getTanggal_gaji() != null) {
                 pstmt.setDate(2, new java.sql.Date(gaji.getTanggal_gaji().getTime()));
             } else {
                 pstmt.setNull(2, java.sql.Types.DATE);
             }
+            
+            // jumlah_gaji adalah DECIMAL(12,2)
             pstmt.setDouble(3, gaji.getJumlah_gaji());
+            
+            // bonus adalah DECIMAL(12,2)
             pstmt.setDouble(4, gaji.getBonus());
+            
+            // nomor_rekening adalah VARCHAR(20)
+            pstmt.setString(5, gaji.getNomor_rekening());
+            
+            // tanggal_pembayaran adalah DATETIME
             if (gaji.getTanggal_pembayaran() != null) {
-                pstmt.setDate(5, new java.sql.Date(gaji.getTanggal_pembayaran().getTime()));
+                pstmt.setTimestamp(6, new java.sql.Timestamp(gaji.getTanggal_pembayaran().getTime()));
             } else {
-                pstmt.setNull(5, java.sql.Types.DATE);
+                pstmt.setNull(6, java.sql.Types.TIMESTAMP);
             }
-            pstmt.setString(6, gaji.getKeterangan());
+            
+            // keterangan adalah VARCHAR(255)
+            pstmt.setString(7, gaji.getKeterangan());
 
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;
@@ -47,7 +62,8 @@ public class GajiController {
 
     public List<GajiModel> getAllGaji() {
         List<GajiModel> daftarGaji = new ArrayList<>();
-        String sql = "SELECT * FROM gaji_crew ORDER BY id_gaji ASC";
+        // Menggunakan nama tabel "gaji"
+        String sql = "SELECT * FROM gaji ORDER BY created_at DESC";
         try (Connection conn = DbConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -55,14 +71,15 @@ public class GajiController {
             while (rs.next()) {
                 GajiModel gaji = new GajiModel();
                 gaji.setId_gaji(rs.getInt("id_gaji"));
-                gaji.setId_crew(rs.getString("id_crew"));
-                gaji.setTanggal_gaji(rs.getDate("tanggal_gaji")); // Hasilnya java.sql.Date, bisa langsung di-set jika field di model adalah java.util.Date
-                gaji.setJumlah_gaji(rs.getDouble("jumlah_gaji"));
-                gaji.setBonus(rs.getDouble("bonus"));
-                gaji.setTanggal_pembayaran(rs.getDate("tanggal_pembayaran"));
-                gaji.setKeterangan(rs.getString("keterangan"));
-                gaji.setCreated_at(rs.getTimestamp("created_at")); // Hasilnya java.sql.Timestamp
-                gaji.setUpdated_at(rs.getTimestamp("updated_at"));
+                gaji.setId_crew(rs.getInt("id_crew")); // INT(11)
+                gaji.setTanggal_gaji(rs.getDate("tanggal_gaji")); // DATE
+                gaji.setJumlah_gaji(rs.getDouble("jumlah_gaji")); // DECIMAL(12,2)
+                gaji.setBonus(rs.getDouble("bonus")); // DECIMAL(12,2)
+                gaji.setNomor_rekening(rs.getString("nomor_rekening")); // VARCHAR(20)
+                gaji.setTanggal_pembayaran(rs.getTimestamp("tanggal_pembayaran")); // DATETIME
+                gaji.setKeterangan(rs.getString("keterangan")); // VARCHAR(255)
+                gaji.setCreated_at(rs.getTimestamp("created_at")); // DATETIME
+                gaji.setUpdated_at(rs.getTimestamp("updated_at")); // DATETIME
                 daftarGaji.add(gaji);
             }
         } catch (SQLException e) {
@@ -73,7 +90,8 @@ public class GajiController {
     }
 
     public GajiModel getGajiById(int idGaji) {
-        String sql = "SELECT * FROM gaji_crew WHERE id_gaji = ?";
+        // Menggunakan nama tabel "gaji"
+        String sql = "SELECT * FROM gaji WHERE id_gaji = ?";
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idGaji);
@@ -81,14 +99,15 @@ public class GajiController {
                 if (rs.next()) {
                     GajiModel gaji = new GajiModel();
                     gaji.setId_gaji(rs.getInt("id_gaji"));
-                    gaji.setId_crew(rs.getString("id_crew"));
-                    gaji.setTanggal_gaji(rs.getDate("tanggal_gaji"));
-                    gaji.setJumlah_gaji(rs.getDouble("jumlah_gaji"));
-                    gaji.setBonus(rs.getDouble("bonus"));
-                    gaji.setTanggal_pembayaran(rs.getDate("tanggal_pembayaran"));
-                    gaji.setKeterangan(rs.getString("keterangan"));
-                    gaji.setCreated_at(rs.getTimestamp("created_at"));
-                    gaji.setUpdated_at(rs.getTimestamp("updated_at"));
+                    gaji.setId_crew(rs.getInt("id_crew")); // INT(11)
+                    gaji.setTanggal_gaji(rs.getDate("tanggal_gaji")); // DATE
+                    gaji.setJumlah_gaji(rs.getDouble("jumlah_gaji")); // DECIMAL(12,2)
+                    gaji.setBonus(rs.getDouble("bonus")); // DECIMAL(12,2)
+                    gaji.setNomor_rekening(rs.getString("nomor_rekening")); // VARCHAR(20)
+                    gaji.setTanggal_pembayaran(rs.getTimestamp("tanggal_pembayaran")); // DATETIME
+                    gaji.setKeterangan(rs.getString("keterangan")); // VARCHAR(255)
+                    gaji.setCreated_at(rs.getTimestamp("created_at")); // DATETIME
+                    gaji.setUpdated_at(rs.getTimestamp("updated_at")); // DATETIME
                     return gaji;
                 }
             }
@@ -100,25 +119,43 @@ public class GajiController {
     }
 
     public boolean updateGaji(GajiModel gaji) {
-        String sql = "UPDATE gaji_crew SET id_crew = ?, tanggal_gaji = ?, jumlah_gaji = ?, bonus = ?, tanggal_pembayaran = ?, keterangan = ?, updated_at = NOW() WHERE id_gaji = ?";
+        // Menggunakan nama tabel "gaji"
+        // updated_at = NOW() sudah benar untuk memperbarui timestamp secara otomatis di DB
+        String sql = "UPDATE gaji SET id_crew = ?, tanggal_gaji = ?, jumlah_gaji = ?, bonus = ?, nomor_rekening = ?, tanggal_pembayaran = ?, keterangan = ?, updated_at = NOW() WHERE id_gaji = ?";
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, gaji.getId_crew());
+            // id_crew adalah INT(11)
+            pstmt.setInt(1, gaji.getId_crew());
+            
+            // tanggal_gaji adalah DATE
             if (gaji.getTanggal_gaji() != null) {
                 pstmt.setDate(2, new java.sql.Date(gaji.getTanggal_gaji().getTime()));
             } else {
                 pstmt.setNull(2, java.sql.Types.DATE);
             }
+            
+            // jumlah_gaji adalah DECIMAL(12,2)
             pstmt.setDouble(3, gaji.getJumlah_gaji());
+            
+            // bonus adalah DECIMAL(12,2)
             pstmt.setDouble(4, gaji.getBonus());
-             if (gaji.getTanggal_pembayaran() != null) {
-                pstmt.setDate(5, new java.sql.Date(gaji.getTanggal_pembayaran().getTime()));
+            
+            // nomor_rekening adalah VARCHAR(20)
+            pstmt.setString(5, gaji.getNomor_rekening());
+            
+            // tanggal_pembayaran adalah DATETIME
+            if (gaji.getTanggal_pembayaran() != null) {
+                pstmt.setTimestamp(6, new java.sql.Timestamp(gaji.getTanggal_pembayaran().getTime()));
             } else {
-                pstmt.setNull(5, java.sql.Types.DATE);
+                pstmt.setNull(6, java.sql.Types.TIMESTAMP);
             }
-            pstmt.setString(6, gaji.getKeterangan());
-            pstmt.setInt(7, gaji.getId_gaji());
+            
+            // keterangan adalah VARCHAR(255)
+            pstmt.setString(7, gaji.getKeterangan());
+            
+            // id_gaji (untuk WHERE clause)
+            pstmt.setInt(8, gaji.getId_gaji());
 
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;
@@ -130,7 +167,8 @@ public class GajiController {
     }
 
     public boolean deleteGaji(int idGaji) {
-        String sql = "DELETE FROM gaji_crew WHERE id_gaji = ?";
+        // Menggunakan nama tabel "gaji"
+        String sql = "DELETE FROM gaji WHERE id_gaji = ?";
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idGaji);
@@ -140,6 +178,6 @@ public class GajiController {
             System.err.println("Error saat menghapus gaji: " + e.getMessage());
             e.printStackTrace();
             return false;
-        }
-    }
+ }
+}
 }

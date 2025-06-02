@@ -142,9 +142,7 @@ public class DaftarKaryawan extends javax.swing.JFrame {
         }
     }
 
-    // =======================================================================
-    // BAGIAN PENTING: Perbaikan ActionPerformed untuk Navigasi Menu
-    // =======================================================================
+   
 
     private void jButton17ActionPerformed(java.awt.event.ActionEvent evt) {
         // Navigasi ke Kalender Event (MenuJadwal)
@@ -187,11 +185,7 @@ public class DaftarKaryawan extends javax.swing.JFrame {
         this.dispose(); // Tutup jendela DaftarKaryawan saat ini
     }
 
-    // =======================================================================
-    // END OF PERBAIKAN NAVIGASI
-    // =======================================================================
-
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -260,57 +254,31 @@ public class DaftarKaryawan extends javax.swing.JFrame {
         jButton17.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
         jButton17.setText("Kalender Event");
         jButton17.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        // Action listener for jButton17 is moved to constructor for clarity
-        // jButton17.addActionListener(new java.awt.event.ActionListener() {
-        //     public void actionPerformed(java.awt.event.ActionEvent evt) {
-        //         jButton17ActionPerformed(evt);
-        //     }
-        // });
+      
 
         jButton18.setBackground(new java.awt.Color(251, 200, 42));
         jButton18.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
         jButton18.setText("Daftar Paket");
         jButton18.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        // Action listener for jButton18 is moved to constructor for clarity
-        // jButton18.addActionListener(new java.awt.event.ActionListener() {
-        //     public void actionPerformed(java.awt.event.ActionEvent evt) {
-        //         jButton18ActionPerformed(evt);
-        //     }
-        // });
+        
 
         jButton19.setBackground(new java.awt.Color(251, 200, 42));
         jButton19.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
         jButton19.setText("Inventaris");
         jButton19.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        // Action listener for jButton19 is moved to constructor for clarity
-        // jButton19.addActionListener(new java.awt.event.ActionListener() {
-        //     public void actionPerformed(java.awt.event.ActionEvent evt) {
-        //         jButton19ActionPerformed(evt);
-        //     }
-        // });
+       
 
         jButton20.setBackground(new java.awt.Color(251, 200, 42));
         jButton20.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
         jButton20.setText("Karyawan");
         jButton20.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        // Action listener for jButton20 is moved to constructor for clarity
-        // jButton20.addActionListener(new java.awt.event.ActionListener() {
-        //     public void actionPerformed(java.awt.event.ActionEvent evt) {
-        //         jButton20ActionPerformed(evt);
-        //     }
-        // });
+        
 
         jButton21.setBackground(new java.awt.Color(251, 200, 42));
         jButton21.setFont(new java.awt.Font("SansSerif", 3, 12)); // NOI18N
         jButton21.setText("Penggajian");
         jButton21.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        // Action listener for jButton21 is moved to constructor for clarity
-        // jButton21.addActionListener(new java.awt.event.ActionListener() {
-        //     public void actionPerformed(java.awt.event.ActionEvent evt) {
-        //         jButton21ActionPerformed(evt);
-        //     }
-        // });
-
+       
         javax.swing.GroupLayout roundedPanel3Layout = new javax.swing.GroupLayout(roundedPanel3);
         roundedPanel3.setLayout(roundedPanel3Layout);
         roundedPanel3Layout.setHorizontalGroup(
