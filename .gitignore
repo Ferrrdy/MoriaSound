@@ -6,7 +6,6 @@
 
 # ========== Build Folders ==========
 build/
-dist/
 nbbuild/
 nbdist/
 .generated/
