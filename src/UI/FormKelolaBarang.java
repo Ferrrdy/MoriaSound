@@ -3,11 +3,11 @@ package UI; // Sesuaikan dengan package Anda
 import DataBase.DbConnection; // Pastikan ini adalah path yang benar ke DbConnection Anda
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class FormKelolaBarang extends JDialog {
 
@@ -20,9 +20,10 @@ public class FormKelolaBarang extends JDialog {
     private int idBarangToEdit = -1;
 
     private JTextField txtNamaBarang;
-    private JTextField txtIdKategori;
+    // <-- PERUBAHAN: JTextField diganti menjadi JComboBox
+    private JComboBox<String> cmbNamaKategori;
     private JTextField txtJumlahTotal;
-    private JTextField txtJumlahTersedia; // <-- FIELD BARU DITAMBAHKAN
+    private JTextField txtJumlahTersedia;
     private JComboBox<String> cmbKondisi;
     private JButton btnSimpan;
     private JButton btnBatal;
@@ -44,20 +45,22 @@ public class FormKelolaBarang extends JDialog {
 
     /**
      * Konstruktor untuk Mode EDIT.
-     * Sekarang menyertakan jumlahTersedia.
      */
     public FormKelolaBarang(Frame parent, boolean modal, int idBarang, String nama, int idKat, int jumlahTotal, int jumlahTersedia, String kondisi) {
         super(parent, modal);
         this.currentMode = FormMode.EDIT;
         this.idBarangToEdit = idBarang;
         setTitle("Edit Data Barang - ID: " + idBarang);
-        initComponentsUI();
+        initComponentsUI(); // <-- UI diinisialisasi dulu (termasuk dropdown)
 
+        // Mengisi data yang sudah ada
         txtNamaBarang.setText(nama);
-        txtIdKategori.setText(String.valueOf(idKat));
         txtJumlahTotal.setText(String.valueOf(jumlahTotal));
-        txtJumlahTersedia.setText(String.valueOf(jumlahTersedia)); // <-- ISI FIELD BARU
+        txtJumlahTersedia.setText(String.valueOf(jumlahTersedia));
         cmbKondisi.setSelectedItem(kondisi);
+        
+        // <-- PERUBAHAN: Set item terpilih di dropdown berdasarkan idKat
+        setKategoriForEdit(idKat);
 
         pack();
         setLocationRelativeTo(parent);
@@ -66,13 +69,17 @@ public class FormKelolaBarang extends JDialog {
 
     private void initComponentsUI() {
         txtNamaBarang = new JTextField(25);
-        txtIdKategori = new JTextField(10);
+        // <-- PERUBAHAN: Inisialisasi JComboBox
+        cmbNamaKategori = new JComboBox<>();
         txtJumlahTotal = new JTextField(10);
-        txtJumlahTersedia = new JTextField(10); // <-- INISIALISASI FIELD BARU
+        txtJumlahTersedia = new JTextField(10);
         cmbKondisi = new JComboBox<>(new String[]{"Baik", "Rusak Ringan", "Perlu Perbaikan", "Rusak Berat"});
 
         btnSimpan = new JButton("Simpan");
         btnBatal = new JButton("Batal");
+
+        // <-- PERUBAHAN: Memanggil metode untuk mengisi dropdown kategori
+        loadKategoriToComboBox();
 
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -85,17 +92,18 @@ public class FormKelolaBarang extends JDialog {
         gbc.gridx = 0; gbc.gridy = yPos; gbc.fill = GridBagConstraints.NONE; add(new JLabel("Nama Barang:"), gbc);
         gbc.gridx = 1; gbc.gridy = yPos; gbc.fill = GridBagConstraints.HORIZONTAL; add(txtNamaBarang, gbc);
         yPos++;
-
-        gbc.gridx = 0; gbc.gridy = yPos; gbc.fill = GridBagConstraints.NONE; add(new JLabel("ID Kategori:"), gbc);
-        gbc.gridx = 1; gbc.gridy = yPos; gbc.fill = GridBagConstraints.HORIZONTAL; add(txtIdKategori, gbc);
+        
+        // <-- PERUBAHAN: Mengganti label dan komponen ke JComboBox
+        gbc.gridx = 0; gbc.gridy = yPos; gbc.fill = GridBagConstraints.NONE; add(new JLabel("Nama Kategori:"), gbc);
+        gbc.gridx = 1; gbc.gridy = yPos; gbc.fill = GridBagConstraints.HORIZONTAL; add(cmbNamaKategori, gbc);
         yPos++;
 
         gbc.gridx = 0; gbc.gridy = yPos; gbc.fill = GridBagConstraints.NONE; add(new JLabel("Jumlah Total:"), gbc);
         gbc.gridx = 1; gbc.gridy = yPos; gbc.fill = GridBagConstraints.HORIZONTAL; add(txtJumlahTotal, gbc);
         yPos++;
 
-        gbc.gridx = 0; gbc.gridy = yPos; gbc.fill = GridBagConstraints.NONE; add(new JLabel("Jumlah Tersedia:"), gbc); // <-- LABEL UNTUK FIELD BARU
-        gbc.gridx = 1; gbc.gridy = yPos; gbc.fill = GridBagConstraints.HORIZONTAL; add(txtJumlahTersedia, gbc); // <-- TAMBAHKAN FIELD BARU KE LAYOUT
+        gbc.gridx = 0; gbc.gridy = yPos; gbc.fill = GridBagConstraints.NONE; add(new JLabel("Jumlah Tersedia:"), gbc);
+        gbc.gridx = 1; gbc.gridy = yPos; gbc.fill = GridBagConstraints.HORIZONTAL; add(txtJumlahTersedia, gbc);
         yPos++;
 
         gbc.gridx = 0; gbc.gridy = yPos; gbc.fill = GridBagConstraints.NONE; add(new JLabel("Kondisi:"), gbc);
@@ -119,13 +127,52 @@ public class FormKelolaBarang extends JDialog {
         });
     }
 
+    // <-- PERUBAHAN: Metode baru untuk mengambil data dari tabel kategori
+    private void loadKategoriToComboBox() {
+        String sql = "SELECT nama_kategori FROM kategori ORDER BY nama_kategori ASC";
+        try (Connection conn = DbConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            
+            while(rs.next()) {
+                cmbNamaKategori.addItem(rs.getString("nama_kategori"));
+            }
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Gagal memuat data kategori: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+    
+    // <-- PERUBAHAN: Metode baru untuk memilih item di combobox saat mode EDIT
+    private void setKategoriForEdit(int idKategori) {
+        String sql = "SELECT nama_kategori FROM kategori WHERE id_kategori = ?";
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, idKategori);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                String namaKategori = rs.getString("nama_kategori");
+                cmbNamaKategori.setSelectedItem(namaKategori);
+            }
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Gagal menemukan nama kategori untuk ID: " + idKategori, "Database Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
+
     private void prosesSimpanData() {
         String namaInput = txtNamaBarang.getText().trim();
-        String idKatInput = txtIdKategori.getText().trim();
+        // <-- PERUBAHAN: Mengambil nama kategori yang dipilih
+        String namaKategoriDipilih = (String) cmbNamaKategori.getSelectedItem();
         String jmlTotalInput = txtJumlahTotal.getText().trim();
-        String jmlTersediaInput = txtJumlahTersedia.getText().trim(); // <-- AMBIL INPUT JUMLAH TERSEDIA
+        String jmlTersediaInput = txtJumlahTersedia.getText().trim();
 
-        if (namaInput.isEmpty() || idKatInput.isEmpty() || jmlTotalInput.isEmpty() || jmlTersediaInput.isEmpty()) { // Semua field wajib
+        if (namaInput.isEmpty() || namaKategoriDipilih == null || jmlTotalInput.isEmpty() || jmlTersediaInput.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Semua field harus diisi!", "Input Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -134,11 +181,24 @@ public class FormKelolaBarang extends JDialog {
         int jmlTotalParsed;
         int jmlTersediaParsed;
 
+        // <-- PERUBAHAN: Mencari ID kategori berdasarkan nama yang dipilih
         try {
-            idKatParsed = Integer.parseInt(idKatInput);
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "ID Kategori harus berupa angka!", "Input Error", JOptionPane.ERROR_MESSAGE);
-            txtIdKategori.requestFocus();
+            String sqlGetId = "SELECT id_kategori FROM kategori WHERE nama_kategori = ?";
+            try (Connection conn = DbConnection.getConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sqlGetId)) {
+                
+                pstmt.setString(1, namaKategoriDipilih);
+                ResultSet rs = pstmt.executeQuery();
+                
+                if (rs.next()) {
+                    idKatParsed = rs.getInt("id_kategori");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Kategori yang dipilih tidak valid!", "Input Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Gagal mendapatkan ID Kategori: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -181,10 +241,10 @@ public class FormKelolaBarang extends JDialog {
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
                 pstmt.setString(1, namaInput);
-                pstmt.setInt(2, idKatParsed);
+                pstmt.setInt(2, idKatParsed); // <-- Menggunakan ID yang sudah didapat
                 pstmt.setString(3, kondisiDipilih);
                 pstmt.setInt(4, jmlTotalParsed);
-                pstmt.setInt(5, jmlTersediaParsed); // <-- GUNAKAN INPUT JUMLAH TERSEDIA
+                pstmt.setInt(5, jmlTersediaParsed);
 
                 if (pstmt.executeUpdate() > 0) {
                     JOptionPane.showMessageDialog(this, "Barang baru berhasil ditambahkan!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
@@ -205,11 +265,11 @@ public class FormKelolaBarang extends JDialog {
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
                 pstmt.setString(1, namaInput);
-                pstmt.setInt(2, idKatParsed);
+                pstmt.setInt(2, idKatParsed); // <-- Menggunakan ID yang sudah didapat
                 pstmt.setString(3, kondisiDipilih);
                 pstmt.setInt(4, jmlTotalParsed);
-                pstmt.setInt(5, jmlTersediaParsed); // <-- GUNAKAN INPUT JUMLAH TERSEDIA
-                pstmt.setInt(6, idBarangToEdit);    // idBarangToEdit jadi parameter ke-6
+                pstmt.setInt(5, jmlTersediaParsed);
+                pstmt.setInt(6, idBarangToEdit);
 
                 if (pstmt.executeUpdate() > 0) {
                     JOptionPane.showMessageDialog(this, "Data barang berhasil diperbarui!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
@@ -243,7 +303,8 @@ public class FormKelolaBarang extends JDialog {
             System.out.println("Dialog Tambah ditutup. Operasi DB Sukses: " + dialogTambah.isDBOperationSuccess());
 
             System.out.println("\nMencoba buka FormKelolaBarang dalam mode EDIT...");
-            FormKelolaBarang dialogEdit = new FormKelolaBarang(dummyFrame, true, 1, "Barang Tes Edit", 1, 10, 8, "Baik");
+            // Ganti parameter ini sesuai data yang ada di DB Anda untuk tes
+            FormKelolaBarang dialogEdit = new FormKelolaBarang(dummyFrame, true, 1, "Barang Tes Edit", 2, 10, 8, "Baik"); 
             dialogEdit.setVisible(true);
             System.out.println("Dialog Edit ditutup. Operasi DB Sukses: " + dialogEdit.isDBOperationSuccess());
 
