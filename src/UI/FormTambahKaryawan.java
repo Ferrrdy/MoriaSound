@@ -1,100 +1,137 @@
 package UI;
 
-import Model.Crew;
-import Controller.CrewController;
+// import Controller.CrewController;
+// import Model.Crew;
+// import UI.TampilanUtama;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.text.NumberFormat;
 
-public class FormTambahKaryawan extends JFrame {
-    private JTextField tfNama, tfPosisi, tfGaji;
+public class FormTambahKaryawan extends JDialog {
+    private JTextField tfNama;
+    private JTextField tfPosisi; // <- Dikembalikan menjadi JTextField
+    private JFormattedTextField tfGaji;
     private JButton btnSimpan, btnBatal;
 
-    public FormTambahKaryawan() {
-        super("Form Tambah Crew");
+    // private TampilanUtama frameUtama;
+
+    public FormTambahKaryawan(Frame owner) {
+        super(owner, "Form Tambah Crew", true);
+        // this.frameUtama = frameUtama;
         initUI();
     }
 
     private void initUI() {
-        setLayout(new GridLayout(4, 2, 10, 10));
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setResizable(false);
+        setLayout(new BorderLayout());
 
-        add(new JLabel("Nama Crew"));
-        tfNama = new JTextField();
-        add(tfNama);
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBorder(BorderFactory.createCompoundBorder(
+                new EmptyBorder(10, 10, 10, 10),
+                new TitledBorder("Detail Karyawan")
+        ));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
 
-        add(new JLabel("Posisi"));
-        tfPosisi = new JTextField();
-        add(tfPosisi);
+        // Baris 1: Nama Crew
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        formPanel.add(new JLabel("Nama Crew:"), gbc);
 
-        add(new JLabel("Gaji Bulanan"));
-        tfGaji = new JTextField();
-        add(tfGaji);
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        tfNama = new JTextField(20);
+        formPanel.add(tfNama, gbc);
 
-        btnBatal = new JButton("Batal");
+        // Baris 2: Posisi (Menggunakan JTextField)
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        formPanel.add(new JLabel("Posisi:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        tfPosisi = new JTextField(); // <- Dikembalikan menjadi JTextField
+        formPanel.add(tfPosisi, gbc);
+
+        // Baris 3: Gaji Bulanan (Menggunakan JFormattedTextField)
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        formPanel.add(new JLabel("Gaji Bulanan:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        NumberFormat formatGaji = NumberFormat.getNumberInstance();
+        formatGaji.setGroupingUsed(false);
+        tfGaji = new JFormattedTextField(formatGaji);
+        tfGaji.setColumns(15);
+        formPanel.add(tfGaji, gbc);
+
+        // === PANEL TOMBOL (BAWAH) ===
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         btnSimpan = new JButton("Simpan");
-        add(btnBatal);
-        add(btnSimpan);
+        btnBatal = new JButton("Batal");
+        buttonPanel.add(btnSimpan);
+        buttonPanel.add(btnBatal);
 
         btnSimpan.addActionListener(e -> simpanCrew());
         btnBatal.addActionListener(e -> dispose());
 
+        add(formPanel, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
+
         pack();
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(getOwner());
     }
 
     private void simpanCrew() {
         String nama = tfNama.getText().trim();
-        String posisi = tfPosisi.getText().trim();
-        String gajiText = tfGaji.getText().trim();
+        String posisi = tfPosisi.getText().trim(); // <- Cara mengambil data disesuaikan lagi
+        Object gajiValue = tfGaji.getValue();
 
-        if (nama.isEmpty() || posisi.isEmpty() || gajiText.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                "Semua field harus diisi.",
-                "Peringatan",
-                JOptionPane.WARNING_MESSAGE
-            );
+        // Validasi disesuaikan untuk JTextField Posisi
+        if (nama.isEmpty() || posisi.isEmpty() || gajiValue == null) {
+            JOptionPane.showMessageDialog(this, "Semua field harus diisi.", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        double gaji;
-        try {
-            gaji = Double.parseDouble(gajiText);
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this,
-                "Gaji Bulanan harus berupa angka.",
-                "Error",
-                JOptionPane.ERROR_MESSAGE
-            );
+        double gaji = ((Number) gajiValue).doubleValue();
+        if (gaji <= 0) {
+            JOptionPane.showMessageDialog(this, "Gaji harus lebih besar dari 0.", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        Crew crew = new Crew();
-        crew.setNamaCrew(nama);
-        crew.setPosisi(posisi);
-        crew.setGajiBulanan(gaji);
-
-        boolean berhasil = CrewController.addCrew(crew);
-        if (berhasil) {
-            JOptionPane.showMessageDialog(this,
-                "Data crew berhasil disimpan.",
-                "Sukses",
-                JOptionPane.INFORMATION_MESSAGE
-            );
-            dispose();
-        } else {
-            JOptionPane.showMessageDialog(this,
-                "Gagal menyimpan data.",
-                "Error",
-                JOptionPane.ERROR_MESSAGE
-            );
-        }
+        // Contoh sementara jika Controller belum siap
+        String pesan = String.format("Data siap disimpan:\nNama: %s\nPosisi: %s\nGaji: %.2f", nama, posisi, gaji);
+        JOptionPane.showMessageDialog(this, pesan, "Sukses", JOptionPane.INFORMATION_MESSAGE);
+        
+        // if (frameUtama != null) {
+        //     frameUtama.refreshTabelKaryawan();
+        // }
+        dispose();
     }
 
+    // main method untuk testing form secara mandiri
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new FormTambahKaryawan().setVisible(true);
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            FormTambahKaryawan dialog = new FormTambahKaryawan(null);
+            dialog.setVisible(true);
         });
     }
 }
