@@ -2,7 +2,7 @@ package Controller;
 
 public class InsufficientStockException extends Exception {
     private final int idBarang;
-    private final String namaBarang; // Opsional, jika ingin menampilkan nama barang
+    private final String namaBarang;
     private final int jumlahDibutuhkan;
     private final int jumlahTersedia;
 
@@ -14,25 +14,14 @@ public class InsufficientStockException extends Exception {
         this.jumlahTersedia = jumlahTersedia;
     }
 
-    // Konstruktor yang lebih sederhana
     public InsufficientStockException(int idBarang, String namaBarang, int jumlahDibutuhkan, int jumlahTersedia) {
         this("Stok untuk barang '" + (namaBarang != null ? namaBarang : "ID: " + idBarang) + "' tidak mencukupi. Dibutuhkan: " + jumlahDibutuhkan + ", Tersedia: " + jumlahTersedia,
              idBarang, namaBarang, jumlahDibutuhkan, jumlahTersedia);
     }
 
-    public int getIdBarang() {
-        return idBarang;
-    }
-
-    public String getNamaBarang() {
-        return namaBarang;
-    }
-
-    public int getJumlahDibutuhkan() {
-        return jumlahDibutuhkan;
-    }
-
-    public int getJumlahTersedia() {
-        return jumlahTersedia;
-    }
+    // Getter methods
+    public int getIdBarang() { return idBarang; }
+    public String getNamaBarang() { return namaBarang; }
+    public int getJumlahDibutuhkan() { return jumlahDibutuhkan; }
+    public int getJumlahTersedia() { return jumlahTersedia; }
 }
