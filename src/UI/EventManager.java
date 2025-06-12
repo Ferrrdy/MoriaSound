@@ -4,8 +4,9 @@ import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.PropertyChangeListener; // Untuk JDateChooser
+import java.beans.PropertyChangeListener;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -25,15 +26,76 @@ import com.toedter.calendar.JDateChooser;
 import Controller.EventController;
 import Controller.InsufficientStockException;
 import DataBase.DbConnection;
+import Model.Event;
 
 public class EventManager {
     private final Map<LocalDate, List<String>> events = new HashMap<>();
+    // Map untuk menyimpan mapping nama event ke ID event
+    private final Map<String, Integer> eventNameToIdMap = new HashMap<>();
+    private EventController eventController;
+
+    public EventManager() {
+        System.out.println("EventManager instance created. Map 'events' is initially empty.");
+        this.eventController = new EventController();
+    }
 
     public Map<LocalDate, List<String>> getEvents() {
         return events;
     }
 
-    public void showAddEventDialog(Component parent, LocalDate currentDate, Runnable updateCallback) {
+    public void loadEventsForMonth(YearMonth yearMonth, Runnable refreshCallback) {
+        System.out.println("EventManager: MEMUAT EVENTS untuk bulan: " + yearMonth + "...");
+        this.events.clear(); 
+        this.eventNameToIdMap.clear(); // Clear mapping juga
+        
+        try {
+            // Load events dengan ID untuk mapping
+            loadEventsWithIdMapping(yearMonth);
+            System.out.println("EventManager: Events dimuat dari DB. Jumlah tanggal dengan event: " + this.events.size());
+        } catch (SQLException e) {
+            e.printStackTrace(); 
+            JOptionPane.showMessageDialog(null, 
+                "Gagal memuat data event dari database untuk bulan " + yearMonth.toString() + ":\n" + e.getMessage(), 
+                "Error Database", JOptionPane.ERROR_MESSAGE);
+        }
+
+        if (refreshCallback != null) {
+            System.out.println("EventManager: Menjalankan refreshCallback setelah loadEventsForMonth.");
+            refreshCallback.run(); 
+        } else {
+            System.out.println("EventManager: refreshCallback adalah null di loadEventsForMonth.");
+        }
+    }
+
+    private void loadEventsWithIdMapping(YearMonth yearMonth) throws SQLException {
+        LocalDate firstDay = yearMonth.atDay(1);
+        LocalDate lastDay = yearMonth.atEndOfMonth();
+
+        String sql = "SELECT id_event, tanggal_mulai, nama_event FROM event " +
+                     "WHERE tanggal_mulai >= ? AND tanggal_mulai <= ? ORDER BY tanggal_mulai";
+        
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setTimestamp(1, java.sql.Timestamp.valueOf(firstDay.atStartOfDay()));
+            stmt.setTimestamp(2, java.sql.Timestamp.valueOf(lastDay.atTime(23, 59, 59))); 
+            
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                int eventId = rs.getInt("id_event");
+                LocalDate eventDate = rs.getTimestamp("tanggal_mulai").toLocalDateTime().toLocalDate();
+                String eventName = rs.getString("nama_event");
+                
+                // Simpan ke map events
+                events.computeIfAbsent(eventDate, k -> new ArrayList<>()).add(eventName);
+                
+                // Simpan mapping nama ke ID
+                eventNameToIdMap.put(eventName, eventId);
+            }
+        } 
+    }
+
+    public void showAddEventDialog(Component parent, LocalDate currentDate, Runnable updateCallbackSetelahSimpan) {
         Frame frameParent = null;
         if (parent instanceof Frame) {
             frameParent = (Frame) parent;
@@ -54,11 +116,15 @@ public class EventManager {
         if (dialogTambahEvent.isSaved()) {
             String namaEventBaru = dialogTambahEvent.getNamaEventDisimpan();
             LocalDate tanggalMulaiEventBaru = dialogTambahEvent.getTanggalMulaiDisimpanAsLocalDate();
+            
             if (namaEventBaru != null && tanggalMulaiEventBaru != null) {
                 events.computeIfAbsent(tanggalMulaiEventBaru, d -> new ArrayList<>()).add(namaEventBaru);
+                System.out.println("EventManager (showAddEventDialog): Event baru '" + namaEventBaru + "' ditambahkan ke map in-memory.");
             }
-            if (updateCallback != null) {
-                 updateCallback.run();
+            
+            if (updateCallbackSetelahSimpan != null) {
+                 System.out.println("EventManager (showAddEventDialog): Menjalankan updateCallbackSetelahSimpan.");
+                updateCallbackSetelahSimpan.run();
             }
         }
     }
@@ -67,23 +133,191 @@ public class EventManager {
         return events.getOrDefault(date, new ArrayList<>());
     }
 
-    public void deleteEvent(LocalDate date, String eventTitle) {
-        List<String> list = events.get(date);
-        if (list != null) {
-            list.remove(eventTitle);
-            if (list.isEmpty()) events.remove(date);
+    // Method untuk delete event berdasarkan tanggal dan nama event
+public void deleteEvent(LocalDate date, String eventName) {
+    try {
+        // Dapatkan ID event dari mapping
+        Integer eventId = eventNameToIdMap.get(eventName);
+        if (eventId == null) {
+            JOptionPane.showMessageDialog(null, 
+                "ID Event tidak ditemukan untuk: " + eventName, 
+                "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-        JOptionPane.showMessageDialog(null, "Fungsi HAPUS event dari kalender perlu implementasi interaksi ke database.");
-    }
 
-    public void editEvent(LocalDate date, String oldTitle, String newTitle) {
-        List<String> list = events.get(date);
-        if (list != null && list.contains(oldTitle)) {
-            list.set(list.indexOf(oldTitle), newTitle);
+        // Konfirmasi penghapusan
+        int confirm = JOptionPane.showConfirmDialog(null, 
+            "Apakah Anda yakin ingin menghapus event '" + eventName + "'?\n" +
+            "Semua data terkait event ini juga akan dihapus.", 
+            "Konfirmasi Hapus", 
+            JOptionPane.YES_NO_OPTION, 
+            JOptionPane.WARNING_MESSAGE);
+            
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
         }
-        JOptionPane.showMessageDialog(null, "Fungsi EDIT event dari kalender perlu implementasi interaksi ke database.");
+
+        // Hapus dari database menggunakan controller
+        if (eventController.deleteEvent(eventId)) {
+            // Hapus dari map lokal jika berhasil dihapus dari database
+            List<String> eventsOnDate = events.get(date);
+            if (eventsOnDate != null) {
+                eventsOnDate.remove(eventName);
+                if (eventsOnDate.isEmpty()) {
+                    events.remove(date);
+                }
+            }
+            eventNameToIdMap.remove(eventName);
+            
+            JOptionPane.showMessageDialog(null, 
+                "Event berhasil dihapus.", 
+                "Sukses", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, 
+                "Gagal menghapus event dari database.", 
+                "Error Database", JOptionPane.ERROR_MESSAGE);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(null, 
+            "Gagal menghapus event: " + e.getMessage(), 
+            "Error Database", JOptionPane.ERROR_MESSAGE);
     }
-    
+}
+
+// Method untuk edit event berdasarkan tanggal dan nama event lama (update semua field)
+public void editEvent(LocalDate date, String oldEventName, Event updatedEvent) {
+    try {
+        // Dapatkan ID event dari mapping
+        Integer eventId = eventNameToIdMap.get(oldEventName);
+        if (eventId == null) {
+            JOptionPane.showMessageDialog(null, 
+                "ID Event tidak ditemukan untuk: " + oldEventName, 
+                "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Set ID untuk event yang akan diupdate
+        updatedEvent.setIdEvent(eventId);
+        
+        // Update di database menggunakan controller
+        if (eventController.updateEvent(updatedEvent)) {
+            // Update map lokal jika berhasil diupdate di database
+            List<String> eventsOnDate = events.get(date);
+            if (eventsOnDate != null) {
+                int index = eventsOnDate.indexOf(oldEventName);
+                if (index != -1) {
+                    eventsOnDate.set(index, updatedEvent.getNamaEvent());
+                }
+            }
+            
+            // Update mapping jika nama event berubah
+            if (!oldEventName.equals(updatedEvent.getNamaEvent())) {
+                eventNameToIdMap.remove(oldEventName);
+                eventNameToIdMap.put(updatedEvent.getNamaEvent(), eventId);
+            }
+            
+            // Jika tanggal berubah, pindahkan event ke tanggal baru
+            LocalDate newDate = updatedEvent.getTanggalMulai().toInstant()
+                .atZone(ZoneId.systemDefault()).toLocalDate();
+            if (!date.equals(newDate)) {
+                // Hapus dari tanggal lama
+                if (eventsOnDate != null) {
+                    eventsOnDate.remove(updatedEvent.getNamaEvent());
+                    if (eventsOnDate.isEmpty()) {
+                        events.remove(date);
+                    }
+                }
+                
+                // Tambahkan ke tanggal baru
+                events.computeIfAbsent(newDate, k -> new ArrayList<>())
+                      .add(updatedEvent.getNamaEvent());
+            }
+            
+            JOptionPane.showMessageDialog(null, 
+                "Event berhasil diubah.", 
+                "Sukses", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, 
+                "Gagal mengubah event di database.", 
+                "Error Database", JOptionPane.ERROR_MESSAGE);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(null, 
+            "Gagal mengubah event: " + e.getMessage(), 
+            "Error Database", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+// Method overload untuk backward compatibility (hanya edit nama)
+public void editEvent(LocalDate date, String oldEventName, String newEventName) {
+    try {
+        // Dapatkan ID event dari mapping
+        Integer eventId = eventNameToIdMap.get(oldEventName);
+        if (eventId == null) {
+            JOptionPane.showMessageDialog(null, 
+                "ID Event tidak ditemukan untuk: " + oldEventName, 
+                "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Buat event object dengan data minimal untuk update nama saja
+        Event updatedEvent = new Event();
+        updatedEvent.setIdEvent(eventId);
+        updatedEvent.setNamaEvent(newEventName);
+        
+        // Ambil data existing event dari database jika diperlukan
+        // Atau bisa menggunakan method khusus updateEventNameOnly di controller
+        
+        // Update menggunakan method updateEventNameOnly (perlu ditambahkan di controller)
+        if (updateEventNameOnly(eventId, newEventName)) {
+            // Update map lokal jika berhasil diupdate di database
+            List<String> eventsOnDate = events.get(date);
+            if (eventsOnDate != null) {
+                int index = eventsOnDate.indexOf(oldEventName);
+                if (index != -1) {
+                    eventsOnDate.set(index, newEventName);
+                }
+            }
+            
+            // Update mapping
+            eventNameToIdMap.remove(oldEventName);
+            eventNameToIdMap.put(newEventName, eventId);
+            
+            JOptionPane.showMessageDialog(null, 
+                "Event berhasil diubah.", 
+                "Sukses", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, 
+                "Gagal mengubah event di database.", 
+                "Error Database", JOptionPane.ERROR_MESSAGE);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(null, 
+            "Gagal mengubah event: " + e.getMessage(), 
+            "Error Database", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+// Method helper untuk update nama event saja
+private boolean updateEventNameOnly(int eventId, String newEventName) {
+    String sql = "UPDATE event SET nama_event = ? WHERE id_event = ?";
+    try (Connection conn = DbConnection.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setString(1, newEventName);
+        stmt.setInt(2, eventId);
+        int rowsAffected = stmt.executeUpdate();
+        return rowsAffected > 0;
+        
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+   
     @SuppressWarnings("unused")
     private void updateDayCombo(JComboBox<Integer> dayCombo, int year, int month) {
         dayCombo.removeAllItems();
@@ -106,6 +340,10 @@ public class EventManager {
 }
 
 class FormTambahEvent extends JDialog {
+    // ... (KODE LENGKAP FormTambahEvent yang sudah disederhanakan, tanpa invoice, tanpa klien,
+    //      PaketItem hanya ID & nama, JDateChooser + JSpinner HH:mm, dan simpanEvent
+    //      yang memanggil aktivasiEventDanProsesBarang secara kondisional,
+    //      SAMA SEPERTI DI RESPONS "full code EventManager" SAYA SEBELUM INI) ...
     private JDateChooser dateChooserTanggalMulai;
     private JDateChooser dateChooserTanggalSelesai;
     private JSpinner spinnerJamMulai;
@@ -116,11 +354,6 @@ class FormTambahEvent extends JDialog {
     private JComboBox<String> cmbStatus;
     private JComboBox<PaketItem> comboPaket;
     private JButton btnSimpan, btnBatal;
-    // Variabel internal untuk menyimpan nilai terpilih
-    // tanggalMulaiTerpilih dan tanggalSelesaiTerpilih akan diambil langsung dari JDateChooser
-    // Variabel jamMulaiTerpilih dan jamSelesaiTerpilih tidak lagi diperlukan jika logika
-    // langsung mengambil dari spinner, atau bisa dipertahankan jika ada alasan lain.
-    // Untuk kesederhanaan, kita bisa langsung baca dari spinner di recalculate dan simpan.
 
     private boolean isSaved = false;
     private String namaEventDisimpan;
@@ -128,21 +361,18 @@ class FormTambahEvent extends JDialog {
 
     private final String[] statusOptions = {"Direncanakan", "Berlangsung", "Selesai", "Dibatalkan"};
 
-
     public FormTambahEvent(Frame parent) {
         super(parent, "Tambah Event Baru", true);
-        // initializeDefaultTime() tidak lagi eksplisit memanipulasi jamMulaiTerpilih/jamSelesaiTerpilih
-        // karena spinner akan diinisialisasi langsung.
-        initComponents(); // Di sini spinner jam akan diinisialisasi
+        initComponents();
         setupActionListeners();
         finalizeDialog();
-        recalculateAndDisplayDuration(); 
+        recalculateAndDisplayDuration();
     }
 
     private void initComponents() {
         txtNamaEvent = new JTextField(25);
         txtLokasi = new JTextField(25);
-        txtAreaKeterangan = new JTextArea(5, 25); 
+        txtAreaKeterangan = new JTextArea(5, 25);
         txtAreaKeterangan.setLineWrap(true);
         txtAreaKeterangan.setWrapStyleWord(true);
         JScrollPane scrollKeterangan = new JScrollPane(txtAreaKeterangan);
@@ -151,21 +381,20 @@ class FormTambahEvent extends JDialog {
         isiComboPaket();
 
         dateChooserTanggalMulai = new JDateChooser();
-        dateChooserTanggalMulai.setDate(new Date()); 
+        dateChooserTanggalMulai.setDate(new Date());
         dateChooserTanggalMulai.setDateFormatString("dd MMM yy");
         dateChooserTanggalMulai.setPreferredSize(new Dimension(130, dateChooserTanggalMulai.getPreferredSize().height));
 
         spinnerJamMulai = new JSpinner(new SpinnerDateModel());
         JSpinner.DateEditor de_spinnerJamMulai = new JSpinner.DateEditor(spinnerJamMulai, "HH:mm");
         spinnerJamMulai.setEditor(de_spinnerJamMulai);
-        setSpinnerTime(spinnerJamMulai, LocalTime.of(9,0)); // Default jam 09:00
+        setSpinnerTime(spinnerJamMulai, LocalTime.of(9,0));
         spinnerJamMulai.setPreferredSize(new Dimension(70, spinnerJamMulai.getPreferredSize().height));
 
         dateChooserTanggalSelesai = new JDateChooser();
-        // Inisialisasi tanggal selesai berdasarkan tanggal mulai dan jam selesai default
         Calendar calSelesaiInit = Calendar.getInstance();
         calSelesaiInit.setTime(dateChooserTanggalMulai.getDate() != null ? dateChooserTanggalMulai.getDate() : new Date());
-        LocalTime jamSelesaiDefault = LocalTime.of(10,0); // Default jam 10:00 (mulai + 1 jam)
+        LocalTime jamSelesaiDefault = LocalTime.of(10,0);
         LocalDateTime initialSelesaiLDT = LocalDateTime.of(
             calSelesaiInit.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
             jamSelesaiDefault
@@ -181,13 +410,11 @@ class FormTambahEvent extends JDialog {
         spinnerJamSelesai.setPreferredSize(new Dimension(70, spinnerJamSelesai.getPreferredSize().height));
 
         lblDurasiOtomatis = new JLabel("Durasi: -");
-
-        btnSimpan = new JButton("Simpan"); // Nama tombol kembali ke "Simpan"
+        btnSimpan = new JButton("Simpan");
         btnBatal = new JButton("Batal");
-        // btnBuatInvoice dihapus
 
         setLayout(new BorderLayout(10, 10));
-        JPanel panelForm = new JPanel(new GridBagLayout()); // Tanpa JTabbedPane
+        JPanel panelForm = new JPanel(new GridBagLayout());
         panelForm.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(3, 5, 3, 5);
@@ -202,7 +429,7 @@ class FormTambahEvent extends JDialog {
         gbc.gridx = 1; gbc.gridy = y; gbc.fill = GridBagConstraints.HORIZONTAL; panelForm.add(dateChooserTanggalMulai, gbc);
         gbc.gridx = 2; gbc.gridy = y; gbc.fill = GridBagConstraints.NONE; panelForm.add(new JLabel("Jam:"), gbc);
         gbc.gridx = 3; gbc.gridy = y; gbc.fill = GridBagConstraints.HORIZONTAL; panelForm.add(spinnerJamMulai, gbc); y++;
-        
+
         gbc.gridx = 0; gbc.gridy = y; panelForm.add(new JLabel("Selesai:"), gbc);
         gbc.gridx = 1; gbc.gridy = y; gbc.fill = GridBagConstraints.HORIZONTAL; panelForm.add(dateChooserTanggalSelesai, gbc);
         gbc.gridx = 2; gbc.gridy = y; gbc.fill = GridBagConstraints.NONE; panelForm.add(new JLabel("Jam:"), gbc);
@@ -214,17 +441,17 @@ class FormTambahEvent extends JDialog {
 
         gbc.gridx = 0; gbc.gridy = y; panelForm.add(new JLabel("Lokasi:"), gbc);
         gbc.gridx = 1; gbc.gridy = y; gbc.gridwidth = 3; gbc.fill = GridBagConstraints.HORIZONTAL; panelForm.add(txtLokasi, gbc); y++;
-        
+
         gbc.gridx = 0; gbc.gridy = y; panelForm.add(new JLabel("Status:"), gbc);
         gbc.gridx = 1; gbc.gridy = y; gbc.gridwidth = 3; gbc.fill = GridBagConstraints.HORIZONTAL; panelForm.add(cmbStatus, gbc); y++;
-        
+
         gbc.gridx = 0; gbc.gridy = y; panelForm.add(new JLabel("Paket:"), gbc);
         gbc.gridx = 1; gbc.gridy = y; gbc.gridwidth = 3; gbc.fill = GridBagConstraints.HORIZONTAL; panelForm.add(comboPaket, gbc); y++;
-        
+
         gbc.gridx = 0; gbc.gridy = y; gbc.anchor = GridBagConstraints.NORTHWEST; panelForm.add(new JLabel("Keterangan:"), gbc);
         gbc.gridx = 1; gbc.gridy = y; gbc.gridwidth = 3; gbc.fill = GridBagConstraints.BOTH; gbc.weighty = 1.0; panelForm.add(scrollKeterangan, gbc); y++;
         gbc.weighty = 0;
-        
+
         add(panelForm, BorderLayout.CENTER);
 
         JPanel panelButtonBawah = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -233,7 +460,7 @@ class FormTambahEvent extends JDialog {
         add(panelButtonBawah, BorderLayout.SOUTH);
 
         pack();
-        setMinimumSize(new Dimension(550, getSize().height)); 
+        setMinimumSize(new Dimension(550, getSize().height));
         setLocationRelativeTo(getParent());
     }
 
@@ -250,17 +477,17 @@ class FormTambahEvent extends JDialog {
 
     private LocalTime getSpinnerTime(JSpinner spinner) {
         Date date = (Date) spinner.getValue();
-        if (date == null) { 
-            return LocalTime.MIDNIGHT; // Default jika spinner kosong (seharusnya tidak terjadi dengan SpinnerDateModel)
+        if (date == null) {
+            return LocalTime.MIDNIGHT;
         }
         return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()).toLocalTime();
     }
-    
+
     private void setupActionListeners() {
         PropertyChangeListener dateChangeListener = evt -> recalculateAndDisplayDuration();
         dateChooserTanggalMulai.addPropertyChangeListener("date", dateChangeListener);
         dateChooserTanggalSelesai.addPropertyChangeListener("date", dateChangeListener);
-        
+
         ChangeListener timeChangeListener = e -> {
             recalculateAndDisplayDuration();
         };
@@ -272,9 +499,8 @@ class FormTambahEvent extends JDialog {
             isSaved = false;
             dispose();
         });
-        // Listener untuk btnBuatInvoice dihapus
     }
-    
+
     private void recalculateAndDisplayDuration() {
         Date tglMulaiUtil = dateChooserTanggalMulai.getDate();
         Date tglSelesaiUtil = dateChooserTanggalSelesai.getDate();
@@ -307,11 +533,10 @@ class FormTambahEvent extends JDialog {
     private void isiComboPaket() {
         try (Connection conn = DbConnection.getConnection();
              Statement stmt = conn.createStatement();
-             // Query hanya mengambil id_paket dan nama_paket
              ResultSet rs = stmt.executeQuery("SELECT id_paket, nama_paket FROM paket")) {
             while (rs.next()) {
                 comboPaket.addItem(new PaketItem(
-                    rs.getInt("id_paket"), 
+                    rs.getInt("id_paket"),
                     rs.getString("nama_paket")
                 ));
             }
@@ -325,7 +550,7 @@ class FormTambahEvent extends JDialog {
         String namaEvent = txtNamaEvent.getText().trim();
         String lokasi = txtLokasi.getText().trim();
         String keterangan = txtAreaKeterangan.getText().trim();
-        String status = (String) cmbStatus.getSelectedItem();
+        String statusDipilih = (String) cmbStatus.getSelectedItem();
         PaketItem paketDipilih = (PaketItem) comboPaket.getSelectedItem();
 
         Date tglMulaiUtil = dateChooserTanggalMulai.getDate();
@@ -333,14 +558,13 @@ class FormTambahEvent extends JDialog {
         LocalTime jamMulaiSaatIni = getSpinnerTime(spinnerJamMulai);
         LocalTime jamSelesaiSaatIni = getSpinnerTime(spinnerJamSelesai);
 
-        // Validasi nama klien dihapus
-        if (namaEvent.isEmpty() || lokasi.isEmpty() || paketDipilih == null || 
-            tglMulaiUtil == null || jamMulaiSaatIni == null || 
-            tglSelesaiUtil == null || jamSelesaiSaatIni == null) { 
+        if (namaEvent.isEmpty() || lokasi.isEmpty() || paketDipilih == null ||
+            tglMulaiUtil == null || jamMulaiSaatIni == null ||
+            tglSelesaiUtil == null || jamSelesaiSaatIni == null) {
             JOptionPane.showMessageDialog(this, "Harap lengkapi semua field yang wajib diisi (Nama Event, Lokasi, Paket, Tanggal & Jam).", "Input Tidak Lengkap", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
+
         LocalDate tglMulaiLocalDate = tglMulaiUtil.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate tglSelesaiLocalDate = tglSelesaiUtil.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDateTime mulaiLDT = LocalDateTime.of(tglMulaiLocalDate, jamMulaiSaatIni);
@@ -353,41 +577,50 @@ class FormTambahEvent extends JDialog {
         Duration duration = Duration.between(mulaiLDT, selesaiLDT);
         int durasiJamDatabase = (int) duration.toHours();
 
-        // idEventDisimpan tidak lagi relevan jika invoice dihapus total
-        int idEvent = -1; 
+        int idEventBaru = -1;
         try {
-            idEvent = EventController.insertEvent(namaEvent, mulaiLDT, selesaiLDT, durasiJamDatabase, lokasi, keterangan, status);
-            
-            boolean paketDitambahkan = EventController.tambahPaketKeEvent(idEvent, paketDipilih.getId());
-            if (!paketDitambahkan && idEvent != -1) {
-                 JOptionPane.showMessageDialog(this, "Event utama tersimpan, tetapi gagal menambahkan paket (kemungkinan paket sudah ada atau masalah lain).", "Peringatan Paket", JOptionPane.WARNING_MESSAGE);
+            idEventBaru = EventController.insertEvent(namaEvent, mulaiLDT, selesaiLDT, durasiJamDatabase, lokasi, keterangan, statusDipilih);
+
+            boolean paketDitambahkan = EventController.tambahPaketKeEvent(idEventBaru, paketDipilih.getId());
+            if (!paketDitambahkan) {
+                 JOptionPane.showMessageDialog(this, "Event utama tersimpan (ID: "+idEventBaru+"), tetapi GAGAL menghubungkan paket. Proses barang tidak dilanjutkan.", "Peringatan Paket Kritis", JOptionPane.WARNING_MESSAGE);
+                 this.namaEventDisimpan = namaEvent;
+                 this.tanggalMulaiLocalDateTimeDisimpan = mulaiLDT;
+                 this.isSaved = true;
+                 return;
             }
-            EventController.kurangiStokBarangDariPaket(paketDipilih.getId()); 
+
+            if ("Berlangsung".equals(statusDipilih)) {
+                EventController.aktivasiEventDanProsesBarang(idEventBaru, paketDipilih.getId());
+            }
 
             this.namaEventDisimpan = namaEvent;
             this.tanggalMulaiLocalDateTimeDisimpan = mulaiLDT;
             this.isSaved = true;
-            JOptionPane.showMessageDialog(this, "Event berhasil disimpan.", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-            dispose(); // Event disimpan, dialog bisa ditutup
+            JOptionPane.showMessageDialog(this, "Event berhasil disimpan. Status: " + statusDipilih, "Sukses", JOptionPane.INFORMATION_MESSAGE);
+            dispose();
 
         } catch (InsufficientStockException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage() + "\nEvent ("+namaEvent+") mungkin telah disimpan, tetapi pemrosesan stok gagal.", "Stok Tidak Cukup", JOptionPane.ERROR_MESSAGE);
-            if (idEvent != -1) { this.namaEventDisimpan = namaEvent; this.tanggalMulaiLocalDateTimeDisimpan = mulaiLDT; this.isSaved = true; }
+            JOptionPane.showMessageDialog(this, "Event ("+namaEvent+") berhasil dibuat (ID: "+ (idEventBaru == -1 ? "N/A" : idEventBaru) +"), TETAPI gagal diaktifkan menjadi 'Berlangsung' karena: " + e.getMessage() +
+                                              "\nStatus event di database adalah '" + statusDipilih + "'. Harap periksa stok dan status event secara manual.", "Stok Tidak Cukup untuk Aktivasi", JOptionPane.ERROR_MESSAGE);
+            if (idEventBaru != -1) { this.namaEventDisimpan = namaEvent; this.tanggalMulaiLocalDateTimeDisimpan = mulaiLDT; this.isSaved = true; }
             e.printStackTrace();
         } catch (SQLException e) {
             String pesanError = "Terjadi kesalahan database: " + e.getMessage();
-            if (idEvent != -1) { pesanError += "\nEvent ("+namaEvent+") mungkin telah disimpan. Detail paket atau stok mungkin bermasalah."; }
+            if (idEventBaru != -1) {
+                pesanError += "\nEvent ("+namaEvent+") mungkin sudah tersimpan sebagian (ID: "+idEventBaru+"). Harap periksa konsistensi data.";
+            } else {
+                pesanError += "\nGagal menyimpan event utama.";
+            }
             JOptionPane.showMessageDialog(this, pesanError, "Error Database Kritis", JOptionPane.ERROR_MESSAGE);
-            if (idEvent != -1) { this.namaEventDisimpan = namaEvent; this.tanggalMulaiLocalDateTimeDisimpan = mulaiLDT; this.isSaved = true; }
+            if (idEventBaru != -1) {this.namaEventDisimpan = namaEvent; this.tanggalMulaiLocalDateTimeDisimpan = mulaiLDT; this.isSaved = true; }
             e.printStackTrace();
-        } catch (Exception e) { 
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Terjadi kesalahan aplikasi yang tidak terduga: " + e.getMessage(), "Error Aplikasi", JOptionPane.ERROR_MESSAGE);
-            if (idEvent != -1) { this.namaEventDisimpan = namaEvent; this.tanggalMulaiLocalDateTimeDisimpan = mulaiLDT; this.isSaved = true; }
+            if (idEventBaru != -1) {this.namaEventDisimpan = namaEvent; this.tanggalMulaiLocalDateTimeDisimpan = mulaiLDT; this.isSaved = true; }
             e.printStackTrace();
         }
     }
-
-    // Metode prosesPembuatanInvoice() DIHAPUS
 
     public boolean isSaved() { return isSaved; }
     public String getNamaEventDisimpan() { return namaEventDisimpan; }
@@ -400,7 +633,7 @@ class FormTambahEvent extends JDialog {
         dateChooserTanggalMulai.setDate(Date.from(ldt.toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         setSpinnerTime(spinnerJamMulai, ldt.toLocalTime()); 
         
-        LocalDateTime defaultSelesaiLDT = ldt.plusHours(1); // Default durasi 1 jam
+        LocalDateTime defaultSelesaiLDT = ldt.plusHours(1); 
         dateChooserTanggalSelesai.setDate(Date.from(defaultSelesaiLDT.toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         setSpinnerTime(spinnerJamSelesai, defaultSelesaiLDT.toLocalTime());
         
@@ -409,22 +642,19 @@ class FormTambahEvent extends JDialog {
 
     private void finalizeDialog() { setDefaultCloseOperation(DISPOSE_ON_CLOSE); }
 
-    // Inner class PaketItem disederhanakan, hanya id dan nama
     private static class PaketItem {
         private final int id;
         private final String nama;
-        // private final BigDecimal harga; // Dihapus
 
-        public PaketItem(int id, String nama) { // Harga dihapus dari parameter
+        public PaketItem(int id, String nama) { 
             this.id = id;
             this.nama = nama;
         }
         public int getId() { return id; }
         public String getNama() { return nama; }
-        // public BigDecimal getHarga() { return harga; } // Dihapus
 
         @Override public String toString() { 
-            return nama; // Hanya nama yang ditampilkan
+            return nama; 
         }
         @Override public boolean equals(Object o) {
             if (this == o) return true;
