@@ -1,7 +1,11 @@
+// Di dalam file Model/Paket.java Anda
 package Model;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat; // Import ini
 import java.util.Date;
+import java.util.Locale;    // Import ini
+import java.util.Objects;
 
 public class Paket extends BaseModel {
     private int idPaket;
@@ -17,9 +21,10 @@ public class Paket extends BaseModel {
         this.namaPaket = namaPaket;
         this.harga = harga;
         this.keterangan = keterangan;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+        this.createdAt = createdAt; // Pastikan BaseModel menangani ini atau set di sini
+        this.updatedAt = updatedAt; // Pastikan BaseModel menangani ini atau set di sini
     }
+    
     public int getIdPaket() { return idPaket; }
     public void setIdPaket(int idPaket) { this.idPaket = idPaket; }
 
@@ -31,4 +36,26 @@ public class Paket extends BaseModel {
 
     public String getKeterangan() { return keterangan; }
     public void setKeterangan(String keterangan) { this.keterangan = keterangan; }
+
+    @Override
+    public String toString() {
+        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
+        if (harga != null) {
+            return namaPaket + " (" + currencyFormatter.format(harga) + ")";
+        }
+        return namaPaket; // Jika harga null, tampilkan nama saja
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Paket paket = (Paket) o;
+        return idPaket == paket.idPaket;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(idPaket);
+    }
 }
