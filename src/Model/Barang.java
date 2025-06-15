@@ -9,19 +9,29 @@ public class Barang extends BaseModel {
     private String kondisi;
     private int jumlahTotal;
     private int jumlahTersedia;
+    private int jumlahRusakRingan;
+    private int jumlahRusakBerat;
+    private int jumlahHilang;
 
     public Barang() {}
 
     public Barang(int idBarang, String namaBarang, int idKategori, String kondisi,
-                  int jumlahTotal, int jumlahTersedia, Date createdAt, Date updatedAt) {
+                  int jumlahTotal, int jumlahTersedia, int jumlahRusakRingan, int jumlahRusakBerat, int jumlahHilang,Date createdAt, Date updatedAt) {
         this.idBarang = idBarang;
         this.namaBarang = namaBarang;
         this.idKategori = idKategori;
         this.kondisi = kondisi;
         this.jumlahTotal = jumlahTotal;
         this.jumlahTersedia = jumlahTersedia;
+        this.jumlahRusakRingan = jumlahRusakRingan;
+        this.jumlahRusakBerat = jumlahRusakBerat;
+        this.jumlahHilang = jumlahHilang;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    public int getId() {
+        return this.idBarang;
     }
     
     public int getIdBarang() { return idBarang; }
@@ -42,4 +52,17 @@ public class Barang extends BaseModel {
     public int getJumlahTersedia() { return jumlahTersedia; }
     public void setJumlahTersedia(int jumlahTersedia) { this.jumlahTersedia = jumlahTersedia; }
 
+    public int getJumlahRusakRingan() { return jumlahRusakRingan; }
+    public void setJumlahRusakRingan(int jumlahRusakRingan) { this.jumlahRusakRingan = jumlahRusakRingan; }
+
+    public int getJumlahRusakBerat() { return jumlahRusakBerat; }
+    public void setJumlahRusakBerat(int jumlahRusakBerat) { this.jumlahRusakBerat = jumlahRusakBerat; }
+
+    public int getJumlahHilang() { return jumlahHilang; }
+    public void setJumlahHilang(int jumlahHilang) { this.jumlahHilang = jumlahHilang; }
+
+    @Override
+    public String toString() {
+    return this.namaBarang;
+}
 }
