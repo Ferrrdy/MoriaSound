@@ -39,84 +39,94 @@ public class DaftarBarang extends javax.swing.JFrame {
     }
 
     private void loadTableBarang() {
-        // Langkah 2: Perbarui Nama Kolom
-        String[] kolom = {"Select", "ID", "Nama Barang", "Nama Kategori", "Kondisi", "Jumlah Total", "Jumlah Tersedia", "Created At", "Updated At"};
-        DefaultTableModel model = new DefaultTableModel(null, kolom) {
-            @Override
-            public Class<?> getColumnClass(int column) {
-                return column == 0 ? Boolean.class : super.getColumnClass(column);
-            }
-
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                // Hanya checkbox yang bisa di-klik langsung di tabel
-                return column == 0;
-            }
-        };
-        jTable1.setModel(model);
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        
-        // Langkah 1: Ubah Query SQL untuk menggunakan JOIN
-        String sql = "SELECT b.id_barang, b.nama_barang, k.nama_kategori, b.kondisi, b.jumlah_total, b.jumlah_tersedia, b.created_at, b.updated_at " +
-                     "FROM barang b " +
-                     "JOIN kategori k ON b.id_kategori = k.id_kategori " +
-                     "ORDER BY b.id_barang ASC";
-
-        try (Connection conn = DbConnection.getConnection(); 
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                boolean isSelected = false; // Default untuk checkbox
-                int idBarang = rs.getInt("id_barang");
-                String namaBarang = rs.getString("nama_barang");
-                
-                // Langkah 3: Ambil nama_kategori (String) dari hasil query
-                String namaKategori = rs.getString("nama_kategori");
-                
-                String kondisi = rs.getString("kondisi");
-                int jumlahTotal = rs.getInt("jumlah_total");
-                int jumlahTersedia = rs.getInt("jumlah_tersedia");
-                Timestamp createdAt = rs.getTimestamp("created_at");
-                Timestamp updatedAt = rs.getTimestamp("updated_at");
-
-                // Masukkan namaKategori ke dalam baris tabel
-                model.addRow(new Object[]{isSelected, idBarang, namaBarang, namaKategori, kondisi, jumlahTotal, jumlahTersedia, createdAt, updatedAt});
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Gagal memuat data barang dari database: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace(); 
+    // Langkah 2: Perbarui Nama Kolom untuk menyertakan data kerusakan
+    String[] kolom = {"Select", "ID", "Nama Barang", "Nama Kategori", "Kondisi", "Jumlah Total", "Jumlah Tersedia", "Rusak Ringan", "Rusak Berat", "Hilang", "Created At", "Updated At"};
+    DefaultTableModel model = new DefaultTableModel(null, kolom) {
+        @Override
+        public Class<?> getColumnClass(int column) {
+            return column == 0 ? Boolean.class : super.getColumnClass(column);
         }
 
-        for (int i = 1; i < jTable1.getColumnCount(); i++) {
-            if (i != 2 && i != 7 && i != 8) { // Kolom nama barang, created at, updated at tidak di-center
-                jTable1.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
-            }
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            // Hanya checkbox yang bisa di-klik langsung di tabel
+            return column == 0;
         }
+    };
+    jTable1.setModel(model);
+    DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+    centerRenderer.setHorizontalAlignment(JLabel.CENTER);
 
-        jTable1.setBackground(Color.WHITE);
+    // Langkah 1: Ubah Query SQL untuk mengambil kolom kerusakan
+    String sql = "SELECT b.id_barang, b.nama_barang, k.nama_kategori, b.kondisi, b.jumlah_total, b.jumlah_tersedia, " +
+                 "b.jumlah_rusak_ringan, b.jumlah_rusak_berat, b.jumlah_hilang, b.created_at, b.updated_at " + // <-- TAMBAHKAN KOLOM INI
+                 "FROM barang b " +
+                 "JOIN kategori k ON b.id_kategori = k.id_kategori " +
+                 "ORDER BY b.id_barang ASC";
 
-        JTableHeader header = jTable1.getTableHeader();
-        header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
-        ((DefaultTableCellRenderer) header.getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
+    try (Connection conn = DbConnection.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery(sql)) {
 
-        TableColumnModel columnModel = jTable1.getColumnModel();
-        TableColumn selectColumn = columnModel.getColumn(0);
-        selectColumn.setPreferredWidth(50);
-        selectColumn.setMaxWidth(50);
-        selectColumn.setMinWidth(50);
-        selectColumn.setResizable(false); 
-        
-        columnModel.getColumn(1).setPreferredWidth(30);   // ID
-        columnModel.getColumn(2).setPreferredWidth(120);  // Nama Barang
-        columnModel.getColumn(3).setPreferredWidth(120);  // Nama Kategori
-        columnModel.getColumn(4).setPreferredWidth(100);  // Kondisi
-        columnModel.getColumn(5).setPreferredWidth(100);  // Jumlah Total
-        columnModel.getColumn(6).setPreferredWidth(100);  // Jumlah Tersedia
-        columnModel.getColumn(7).setPreferredWidth(150);  // Created At
-        columnModel.getColumn(8).setPreferredWidth(150);  // Updated At
+        while (rs.next()) {
+            boolean isSelected = false; // Default untuk checkbox
+            int idBarang = rs.getInt("id_barang");
+            String namaBarang = rs.getString("nama_barang");
+            String namaKategori = rs.getString("nama_kategori");
+            String kondisi = rs.getString("kondisi");
+            int jumlahTotal = rs.getInt("jumlah_total");
+            int jumlahTersedia = rs.getInt("jumlah_tersedia");
+
+            // Langkah 3: Ambil Data Baru dari ResultSet
+            int jumlahRusakRingan = rs.getInt("jumlah_rusak_ringan");
+            int jumlahRusakBerat = rs.getInt("jumlah_rusak_berat");
+            int jumlahHilang = rs.getInt("jumlah_hilang");
+
+            Timestamp createdAt = rs.getTimestamp("created_at");
+            Timestamp updatedAt = rs.getTimestamp("updated_at");
+
+            // Langkah 4: Masukkan semua data, termasuk yang baru, ke dalam baris tabel
+            model.addRow(new Object[]{isSelected, idBarang, namaBarang, namaKategori, kondisi, jumlahTotal, jumlahTersedia, jumlahRusakRingan, jumlahRusakBerat, jumlahHilang, createdAt, updatedAt});
+        }
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this, "Gagal memuat data barang dari database: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+        e.printStackTrace();
     }
+
+    // Langkah 5: Sesuaikan perataan (centering) dengan indeks kolom yang baru
+    for (int i = 1; i < jTable1.getColumnCount(); i++) {
+        // Kolom 'Nama Barang' (indeks 2), 'Created At' (indeks 10), 'Updated At' (indeks 11) tidak di-center
+        if (i != 2 && i != 10 && i != 11) { 
+            jTable1.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+    }
+
+    jTable1.setBackground(Color.WHITE);
+
+    JTableHeader header = jTable1.getTableHeader();
+    header.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
+    ((DefaultTableCellRenderer) header.getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
+
+    TableColumnModel columnModel = jTable1.getColumnModel();
+    TableColumn selectColumn = columnModel.getColumn(0);
+    selectColumn.setPreferredWidth(50);
+    selectColumn.setMaxWidth(50);
+    selectColumn.setMinWidth(50);
+    selectColumn.setResizable(false);
+
+    // Langkah 5: Sesuaikan lebar kolom dengan adanya kolom baru
+    columnModel.getColumn(1).setPreferredWidth(30);   // ID
+    columnModel.getColumn(2).setPreferredWidth(120);  // Nama Barang
+    columnModel.getColumn(3).setPreferredWidth(100);  // Nama Kategori
+    columnModel.getColumn(4).setPreferredWidth(80);   // Kondisi
+    columnModel.getColumn(5).setPreferredWidth(85);   // Jumlah Total
+    columnModel.getColumn(6).setPreferredWidth(100);  // Jumlah Tersedia
+    columnModel.getColumn(7).setPreferredWidth(85);   // Rusak Ringan (BARU)
+    columnModel.getColumn(8).setPreferredWidth(85);   // Rusak Berat (BARU)
+    columnModel.getColumn(9).setPreferredWidth(60);   // Hilang (BARU)
+    columnModel.getColumn(10).setPreferredWidth(150); // Created At (Indeks berubah)
+    columnModel.getColumn(11).setPreferredWidth(150); // Updated At (Indeks berubah)
+}
 
     /**
      * This method is called from within the constructor to initialize the form.

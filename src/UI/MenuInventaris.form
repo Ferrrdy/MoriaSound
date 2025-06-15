@@ -99,7 +99,7 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Container class="Custom.RoundedPanel" name="roundedPanel5">
+        <Container class="org.netbeans.modules.form.InvalidComponent" name="roundedPanel5">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="7c" green="7c" red="7c" type="rgb"/>
@@ -129,6 +129,11 @@
                       </Group>
                       <EmptySpace min="-2" pref="162" max="-2" attributes="0"/>
                   </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace min="-2" pref="403" max="-2" attributes="0"/>
+                      <Component id="btnPengelolaanAset" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
+                  </Group>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
@@ -145,6 +150,8 @@
                           <Component id="jButton23" min="-2" pref="43" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="32767" attributes="0"/>
+                      <Component id="btnPengelolaanAset" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="143" max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -202,9 +209,17 @@
                 </Property>
               </Properties>
             </Component>
+            <Component class="javax.swing.JButton" name="btnPengelolaanAset">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Pengelolaan Aset Bermasalah"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnPengelolaanAsetActionPerformed"/>
+              </Events>
+            </Component>
           </SubComponents>
         </Container>
-        <Container class="Custom.RoundedPanel" name="roundedPanel6">
+        <Container class="org.netbeans.modules.form.InvalidComponent" name="roundedPanel6">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="37" green="33" red="2e" type="rgb"/>
@@ -274,7 +289,7 @@
         </Component>
         <Component class="javax.swing.JSeparator" name="jSeparator3">
         </Component>
-        <Container class="Custom.RoundedPanel" name="roundedPanel9">
+        <Container class="org.netbeans.modules.form.InvalidComponent" name="roundedPanel9">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="37" green="33" red="2e" type="rgb"/>

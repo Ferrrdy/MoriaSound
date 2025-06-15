@@ -4,6 +4,7 @@
  */
 package UI;
 import java.awt.geom.RoundRectangle2D;
+import Custom.RoundedPanel;
 /**
  *
  * @author nabil
@@ -36,6 +37,7 @@ int xMouse, yMouse;
         jButton23 = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
+        btnPengelolaanAset = new javax.swing.JButton();
         roundedPanel6 = new Custom.RoundedPanel();
         jLabel9 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -55,10 +57,6 @@ int xMouse, yMouse;
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
-
-        roundedPanel5.setBackground(new java.awt.Color(124, 124, 124));
-        roundedPanel5.setRoundTopLeft(25);
-        roundedPanel5.setRoundTopRight(25);
 
         jButton22.setBackground(new java.awt.Color(251, 200, 42));
         jButton22.setFont(new java.awt.Font("SansSerif", 3, 18)); // NOI18N
@@ -84,6 +82,13 @@ int xMouse, yMouse;
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gambar/TRUCK 300 PUTIH.png"))); // NOI18N
 
+        btnPengelolaanAset.setText("Pengelolaan Aset Bermasalah");
+        btnPengelolaanAset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPengelolaanAsetActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout roundedPanel5Layout = new javax.swing.GroupLayout(roundedPanel5);
         roundedPanel5.setLayout(roundedPanel5Layout);
         roundedPanel5Layout.setHorizontalGroup(
@@ -102,6 +107,10 @@ int xMouse, yMouse;
                         .addComponent(jButton22, javax.swing.GroupLayout.PREFERRED_SIZE, 191, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(47, 47, 47)))
                 .addGap(162, 162, 162))
+            .addGroup(roundedPanel5Layout.createSequentialGroup()
+                .addGap(403, 403, 403)
+                .addComponent(btnPengelolaanAset)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         roundedPanel5Layout.setVerticalGroup(
             roundedPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -114,12 +123,10 @@ int xMouse, yMouse;
                 .addGroup(roundedPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton22, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton23, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnPengelolaanAset)
+                .addGap(143, 143, 143))
         );
-
-        roundedPanel6.setBackground(new java.awt.Color(46, 51, 55));
-        roundedPanel6.setRoundBottomRight(25);
-        roundedPanel6.setRoundTopRight(25);
 
         jLabel9.setFont(new java.awt.Font("SansSerif", 3, 20)); // NOI18N
         jLabel9.setForeground(new java.awt.Color(251, 190, 1));
@@ -154,8 +161,6 @@ int xMouse, yMouse;
                 jButton2ActionPerformed(evt);
             }
         });
-
-        roundedPanel9.setBackground(new java.awt.Color(46, 51, 55));
 
         jLabel10.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gambar/150 no back.png"))); // NOI18N
         jLabel10.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -320,29 +325,11 @@ int xMouse, yMouse;
         this.dispose();
     }//GEN-LAST:event_jButton22ActionPerformed
 
-    private void jLabel10MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel10MouseClicked
-        BerandaBaru menu = new BerandaBaru();
-        menu.setVisible(true);
+    private void jButton39ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton39ActionPerformed
+        MenuGaji gaji = new MenuGaji();
+        gaji.setVisible(true);
         this.dispose();
-    }//GEN-LAST:event_jLabel10MouseClicked
-
-    private void jButton35ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton35ActionPerformed
-        MenuJadwal jadwal = new MenuJadwal();
-        jadwal.setVisible(true);
-        this.dispose();
-    }//GEN-LAST:event_jButton35ActionPerformed
-
-    private void jButton36ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton36ActionPerformed
-        DaftarPaket paket = new DaftarPaket();
-        paket.setVisible(true);
-        this.dispose();
-    }//GEN-LAST:event_jButton36ActionPerformed
-
-    private void jButton37ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton37ActionPerformed
-        MenuInventaris inventaris = new MenuInventaris();
-        inventaris.setVisible(true);
-        this.dispose();
-    }//GEN-LAST:event_jButton37ActionPerformed
+    }//GEN-LAST:event_jButton39ActionPerformed
 
     private void jButton38ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton38ActionPerformed
         DaftarKaryawan crew = new DaftarKaryawan();
@@ -350,11 +337,33 @@ int xMouse, yMouse;
         this.dispose();
     }//GEN-LAST:event_jButton38ActionPerformed
 
-    private void jButton39ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton39ActionPerformed
-        MenuGaji gaji = new MenuGaji();
-        gaji.setVisible(true);
+    private void jButton37ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton37ActionPerformed
+        MenuInventaris inventaris = new MenuInventaris();
+        inventaris.setVisible(true);
         this.dispose();
-    }//GEN-LAST:event_jButton39ActionPerformed
+    }//GEN-LAST:event_jButton37ActionPerformed
+
+    private void jButton36ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton36ActionPerformed
+        DaftarPaket paket = new DaftarPaket();
+        paket.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_jButton36ActionPerformed
+
+    private void jButton35ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton35ActionPerformed
+        MenuJadwal jadwal = new MenuJadwal();
+        jadwal.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_jButton35ActionPerformed
+
+    private void jLabel10MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel10MouseClicked
+        BerandaBaru menu = new BerandaBaru();
+        menu.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_jLabel10MouseClicked
+
+    private void btnPengelolaanAsetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPengelolaanAsetActionPerformed
+        new FormPengelolaanAset().setVisible(true);
+    }//GEN-LAST:event_btnPengelolaanAsetActionPerformed
 
     /**
      * @param args the command line arguments
@@ -392,6 +401,7 @@ int xMouse, yMouse;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnPengelolaanAset;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton22;
     private javax.swing.JButton jButton23;

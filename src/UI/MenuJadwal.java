@@ -1,45 +1,38 @@
 package UI;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
+import Custom.CustomCalendarPanel;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.RoundRectangle2D;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import Custom.CustomCalendarPanel; 
 
 public class MenuJadwal extends javax.swing.JFrame {
     int xMouse, yMouse;
-    private EventManager eventManager; // Instance EventManager untuk MenuJadwal
-    private Custom.CustomCalendarPanel customCalendarPanel1;
+    private final EventManager eventManager;
+    private final CustomCalendarPanel customCalendarPanel;
 
     public MenuJadwal() {
-        this.eventManager = new EventManager(); // Buat instance EventManager di sini
-        initComponents(); // Ini akan memanggil inisialisasi customCalendarPanel1
+        // 1. Buat instance manager dan panel kalender terlebih dahulu
+        this.eventManager = new EventManager();
+        this.customCalendarPanel = new CustomCalendarPanel(this.eventManager, this);
         
+        // 2. Panggil initComponents yang akan menempatkan komponen-komponen tersebut
+        initComponents();
+        
+        // 3. Atur properti frame setelah komponen diinisialisasi
         setLocationRelativeTo(null);
         
+        // 4. Tambahkan listener untuk refresh data
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowOpened(WindowEvent e) {
                 if (getWidth() > 0 && getHeight() > 0) {
                     setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 50, 50));
                 }
-                // Saat window pertama kali dibuka, minta CustomCalendarPanel untuk memuat data
-                if (customCalendarPanel1 != null) {
-                    System.out.println("MenuJadwal: Window Opened, memanggil refresh awal di CustomCalendarPanel.");
-                    customCalendarPanel1.loadAndRefreshCalendarDisplay();
-                }
             }
-
             @Override
             public void windowActivated(WindowEvent e) {
-                // Saat window kembali aktif, minta CustomCalendarPanel untuk memuat ulang data
-                if (customCalendarPanel1 != null) {
-                    System.out.println("MenuJadwal: Window Activated, memanggil refresh di CustomCalendarPanel.");
-                    customCalendarPanel1.loadAndRefreshCalendarDisplay();
-                }
+                // Saat window kembali aktif (misal setelah dialog ditutup), refresh kalender.
+                customCalendarPanel.loadAndRefreshCalendarDisplay();
             }
         });
     }
@@ -49,8 +42,6 @@ public class MenuJadwal extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         roundedPanel5 = new Custom.RoundedPanel();
-        // Inisialisasi customCalendarPanel1 dengan EventManager yang sudah ada
-        customCalendarPanel1 = new Custom.CustomCalendarPanel(this.eventManager, this); 
         roundedPanel8 = new Custom.RoundedPanel();
         jLabel8 = new javax.swing.JLabel();
         jButton30 = new javax.swing.JButton();
@@ -66,7 +57,6 @@ public class MenuJadwal extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setBackground(new java.awt.Color(255, 255, 255));
         setUndecorated(true);
         addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             public void mouseDragged(java.awt.event.MouseEvent evt) {
@@ -81,11 +71,13 @@ public class MenuJadwal extends javax.swing.JFrame {
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
-        roundedPanel5.setBackground(new java.awt.Color(220, 220, 220));
+        roundedPanel5.setBackground(new java.awt.Color(245, 245, 245));
         roundedPanel5.setRoundTopLeft(25);
         roundedPanel5.setRoundTopRight(25);
-        roundedPanel5.setLayout(new java.awt.BorderLayout()); // Pastikan layout sudah di-set
-        roundedPanel5.add(customCalendarPanel1, java.awt.BorderLayout.CENTER); // Tambahkan panel kalender
+        // PENTING: Atur layout untuk panel yang akan menampung kalender
+        roundedPanel5.setLayout(new java.awt.BorderLayout());
+        // Tambahkan instance kalender yang SUDAH DIBUAT di constructor
+        roundedPanel5.add(this.customCalendarPanel, java.awt.BorderLayout.CENTER);
 
         roundedPanel8.setBackground(new java.awt.Color(46, 51, 55));
 
@@ -104,7 +96,8 @@ public class MenuJadwal extends javax.swing.JFrame {
         jButton30.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButton30.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                actionPerformed(evt);
+                // PERBAIKAN: Dikosongkan karena kita sudah berada di halaman ini.
+                // Ini untuk menghindari StackOverflowError.
             }
         });
 
@@ -280,7 +273,7 @@ public class MenuJadwal extends javax.swing.JFrame {
         );
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
+    }
     
     private void formMousePressed(java.awt.event.MouseEvent evt) {                                  
         xMouse = evt.getX();
@@ -291,37 +284,33 @@ public class MenuJadwal extends javax.swing.JFrame {
         this.setLocation(evt.getXOnScreen() - xMouse, evt.getYOnScreen() - yMouse);
     }                                 
 
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {                                         
+        System.exit(0);
+    }
+
+    // --- PERBAIKAN LOGIKA NAVIGASI ---
     private void jLabel8MouseClicked(java.awt.event.MouseEvent evt) {                                     
-        BerandaBaru menu = new BerandaBaru(); 
-        menu.setVisible(true);
+        new BerandaBaru().setVisible(true);
         this.dispose();
     }                                    
 
     private void jButton31ActionPerformed(java.awt.event.ActionEvent evt) {                                          
-        DaftarPaket paket = new DaftarPaket();
-        paket.setVisible(true);
+        new DaftarPaket().setVisible(true);
         this.dispose();
     }                                         
 
     private void jButton32ActionPerformed(java.awt.event.ActionEvent evt) {                                          
-        MenuInventaris inventaris = new MenuInventaris();
-        inventaris.setVisible(true);
+        new MenuInventaris().setVisible(true);
         this.dispose();
     }                                         
 
     private void jButton34ActionPerformed(java.awt.event.ActionEvent evt) {                                          
-        MenuGaji gaji = new MenuGaji();
-        gaji.setVisible(true);
+        new MenuGaji().setVisible(true);
         this.dispose();
     }                                         
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {                                         
-        System.exit(0);
-    }                                        
-
     private void jButton33ActionPerformed(java.awt.event.ActionEvent evt) {                                          
-        DaftarKaryawan crew = new DaftarKaryawan();
-        crew.setVisible(true);
+        new DaftarKaryawan().setVisible(true);
         this.dispose();
     }                                         
 
@@ -353,9 +342,7 @@ public class MenuJadwal extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator7;
-    // private Custom.CustomCalendarPanel customCalendarPanel1; // Deklarasi sudah ada di atas
     private Custom.RoundedPanel roundedPanel5;
     private Custom.RoundedPanel roundedPanel6;
-    private Custom.RoundedPanel roundedPanel8;
-    // End of variables declaration                   
+    private Custom.RoundedPanel roundedPanel8;                 
 }
