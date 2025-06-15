@@ -1,221 +1,91 @@
 package Controller;
 
-import Model.Armada; 
+import DataBase.DbConnection;
+import Model.Armada;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
+/**
+ * Controller untuk mengelola data Armada.
+ * Versi ini terhubung langsung ke database.
+ */
 public class ArmadaController {
-    private List<Armada> daftarArmada;
-    private int nextIdArmada = 1;
-
-    public ArmadaController() {
-        this.daftarArmada = new ArrayList<>();
-        // Contoh data awal (opsional)
-        // initializeContohData(); 
-    }
 
     /**
-     * Inisialisasi data contoh untuk pengujian.
+     * Mengambil semua armada yang berstatus 'Tersedia' dari database.
+     * Digunakan untuk mengisi daftar pilihan di form event.
+     * @return List dari objek Armada.
+     * @throws SQLException jika terjadi error database.
      */
-    private void initializeContohData() {
-        tambahArmada("Truk Box A-001", "Tersedia");
-        tambahArmada("Mobil Van B-002", "Dalam Perbaikan");
-        tambahArmada("Truk Kontainer C-003", "Tersedia");
-    }
-
-    /**
-     *
-     *
-     * @param namaArmada 
-     * @param status
-     * @return 
-     */
-    public Armada tambahArmada(String namaArmada, String status) {
-        if (namaArmada == null || namaArmada.trim().isEmpty()) {
-            System.err.println("Nama armada tidak boleh kosong.");
-            return null;
+    public List<Armada> getAllAvailableArmada() throws SQLException {
+        List<Armada> armadaList = new ArrayList<>();
+        String sql = "SELECT id_armada, nama_armada, status FROM armada WHERE status = 'Tersedia' ORDER BY nama_armada";
+        try (Connection conn = DbConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Armada armada = new Armada(
+                    rs.getInt("id_armada"),
+                    rs.getString("nama_armada")
+                );
+                armada.setStatus(rs.getString("status"));
+                armadaList.add(armada);
+            }
         }
-        if (status == null || status.trim().isEmpty()) {
-            System.err.println("Status armada tidak boleh kosong.");
-            return null;
-        }
-
-        Date sekarang = new Date();
-        Armada armadaBaru = new Armada(
-            nextIdArmada++, 
-            namaArmada, 
-            status, 
-            sekarang, // createdAt
-            sekarang  // updatedAt
-        );
-        this.daftarArmada.add(armadaBaru);
-        System.out.println("Armada '" + namaArmada + "' berhasil ditambahkan dengan ID: " + armadaBaru.getIdArmada());
-        return armadaBaru;
+        return armadaList;
     }
 
     /**
-     * Mendapatkan semua armada dari daftar.
-     *
-     * @return 
+     * [BARU] Mengambil ID armada yang sedang digunakan untuk sebuah event.
+     * @param eventId ID dari event.
+     * @return List dari Integer yang berisi ID armada.
+     * @throws SQLException jika terjadi error database.
      */
-    public List<Armada> lihatSemuaArmada() {
-        if (this.daftarArmada.isEmpty()) {
-            System.out.println("Belum ada armada dalam daftar.");
+    public List<Integer> getUsedArmadaIds(int eventId) throws SQLException {
+        List<Integer> usedIds = new ArrayList<>();
+        // Mengambil dari tabel log armada_digunakan
+        String sql = "SELECT id_armada FROM armada_digunakan WHERE id_event = ? AND tanggal_masuk IS NULL";
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, eventId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                usedIds.add(rs.getInt("id_armada"));
+            }
         }
-        return new ArrayList<>(this.daftarArmada);
+        return usedIds;
     }
 
-    /**
-     * Mencari armada berdasarkan ID.
-     *
-     * @param idArmada 
-     * @return 
-     */
-    public Optional<Armada> cariArmadaById(int idArmada) {
-        return this.daftarArmada.stream()
-                .filter(armada -> armada.getIdArmada() == idArmada)
-                .findFirst();
-    }
+    // Metode CRUD lainnya (jika Anda memiliki fitur manajemen armada terpisah)
     
-    /**
-     * Mencari armada berdasarkan nama.
-     *
-     * @param namaArmada
-     * @return 
-     */
-    public List<Armada> cariArmadaByNama(String namaArmada) {
-        if (namaArmada == null || namaArmada.trim().isEmpty()) {
-            System.out.println("Nama armada pencarian tidak boleh kosong.");
-            return new ArrayList<>();
-        }
-        String namaDicariLower = namaArmada.toLowerCase();
-        return this.daftarArmada.stream()
-                .filter(armada -> armada.getNamaArmada().toLowerCase().contains(namaDicariLower))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Memperbarui data armada yang sudah ada.
-     *
-     * @param idArmada 
-     * @param namaArmadaBaru
-     * @param statusBaru 
-     * @return 
-     */
-    public boolean perbaruiArmada(int idArmada, String namaArmadaBaru, String statusBaru) {
-        Optional<Armada> armadaOptional = cariArmadaById(idArmada);
-        if (armadaOptional.isPresent()) {
-            Armada armada = armadaOptional.get();
-
-            boolean adaPerubahan = false;
-
-            if (namaArmadaBaru != null && !namaArmadaBaru.trim().isEmpty() && !namaArmadaBaru.equals(armada.getNamaArmada())) {
-                armada.setNamaArmada(namaArmadaBaru);
-                adaPerubahan = true;
-            } else if (namaArmadaBaru != null && namaArmadaBaru.trim().isEmpty()){
-                 System.err.println("Nama armada baru tidak boleh kosong saat pembaruan.");
-            }
-
-            if (statusBaru != null && !statusBaru.trim().isEmpty() && !statusBaru.equals(armada.getStatus())) {
-                armada.setStatus(statusBaru);
-                adaPerubahan = true;
-            } else if (statusBaru != null && statusBaru.trim().isEmpty()){
-                System.err.println("Status baru tidak boleh kosong saat pembaruan.");
-            }
-            
-            if (adaPerubahan) {
-                armada.setUpdatedAt(new Date());
-                System.out.println("Armada dengan ID " + idArmada + " berhasil diperbarui.");
-            } else {
-                System.out.println("Tidak ada perubahan data untuk Armada dengan ID " + idArmada + ".");
-            }
-            return true;
-        } else {
-            System.err.println("Gagal memperbarui: Armada dengan ID " + idArmada + " tidak ditemukan.");
-            return false;
+    public boolean tambahArmada(String namaArmada, String status) throws SQLException {
+        String sql = "INSERT INTO armada (nama_armada, status) VALUES (?, ?)";
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, namaArmada);
+            pstmt.setString(2, status);
+            return pstmt.executeUpdate() > 0;
         }
     }
 
-    /**
-     * Menghapus armada dari daftar berdasarkan ID.
-     *
-     * @param idArmada
-     * @return
-     */
-    public boolean hapusArmada(int idArmada) {
-        Optional<Armada> armadaOptional = cariArmadaById(idArmada);
-        if (armadaOptional.isPresent()) {
-            this.daftarArmada.remove(armadaOptional.get());
-            System.out.println("Armada dengan ID " + idArmada + " berhasil dihapus.");
-            return true;
-        } else {
-            System.err.println("Gagal menghapus: Armada dengan ID " + idArmada + " tidak ditemukan.");
-            return false;
+    public boolean perbaruiArmada(int idArmada, String namaArmadaBaru, String statusBaru) throws SQLException {
+        String sql = "UPDATE armada SET nama_armada = ?, status = ? WHERE id_armada = ?";
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, namaArmadaBaru);
+            pstmt.setString(2, statusBaru);
+            pstmt.setInt(3, idArmada);
+            return pstmt.executeUpdate() > 0;
         }
     }
 
-    public static void main(String[] args) {
-        ArmadaController controller = new ArmadaController();
-        controller.initializeContohData();
-
-        System.out.println("--- Daftar Armada Awal ---");
-        controller.lihatSemuaArmada().forEach(a -> 
-            System.out.println("ID: " + a.getIdArmada() + ", Nama: " + a.getNamaArmada() + ", Status: " + a.getStatus())
-        );
-        System.out.println();
-
-        // Menambah armada baru
-        System.out.println("--- Menambah Armada Baru ---");
-        controller.tambahArmada("Motor Bebek X-004", "Tersedia");
-        System.out.println();
-
-        System.out.println("--- Daftar Armada Setelah Penambahan ---");
-        controller.lihatSemuaArmada().forEach(a -> 
-            System.out.println("ID: " + a.getIdArmada() + ", Nama: " + a.getNamaArmada() + ", Status: " + a.getStatus())
-        );
-        System.out.println();
-
-        // Mencari armada
-        System.out.println("--- Mencari Armada ID 2 ---");
-        Optional<Armada> armadaDitemukan = controller.cariArmadaById(2);
-        armadaDitemukan.ifPresent(a -> System.out.println("Ditemukan: " + a.getNamaArmada() + " (" + a.getStatus() + ")"));
-        if (!armadaDitemukan.isPresent()) {
-            System.out.println("Armada dengan ID 2 tidak ditemukan.");
+    public boolean hapusArmada(int idArmada) throws SQLException {
+        String sql = "DELETE FROM armada WHERE id_armada = ?";
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idArmada);
+            return pstmt.executeUpdate() > 0;
         }
-        System.out.println();
-
-        System.out.println("--- Mencari Armada dengan nama 'Truk' ---");
-        List<Armada> hasilCariNama = controller.cariArmadaByNama("Truk");
-        hasilCariNama.forEach(a -> System.out.println("Ditemukan: " + a.getNamaArmada() + " (" + a.getStatus() + ")"));
-         if (hasilCariNama.isEmpty()) {
-            System.out.println("Tidak ada armada dengan nama mengandung 'Truk'.");
-        }
-        System.out.println();
-
-        // Memperbarui armada
-        System.out.println("--- Memperbarui Armada ID 1 ---");
-        controller.perbaruiArmada(1, "Truk Box A-001 Super", "Digunakan");
-        armadaDitemukan = controller.cariArmadaById(1);
-        armadaDitemukan.ifPresent(a -> 
-            System.out.println("Setelah Update: ID: " + a.getIdArmada() + ", Nama: " + a.getNamaArmada() + ", Status: " + a.getStatus())
-        );
-        System.out.println();
-        
-        System.out.println("--- Mencoba Memperbarui Armada ID 1 tanpa perubahan data ---");
-        controller.perbaruiArmada(1, "Truk Box A-001 Super", "Digunakan"); // Data sama
-        System.out.println();
-
-        // Menghapus armada
-        System.out.println("--- Menghapus Armada ID 3 ---");
-        controller.hapusArmada(3);
-        System.out.println();
-
-        System.out.println("--- Daftar Armada Akhir ---");
-        controller.lihatSemuaArmada().forEach(a -> 
-            System.out.println("ID: " + a.getIdArmada() + ", Nama: " + a.getNamaArmada() + ", Status: " + a.getStatus())
-        );
     }
 }
