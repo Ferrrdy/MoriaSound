@@ -341,25 +341,30 @@
                       <EmptySpace min="-2" pref="114" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="2" attributes="0">
                           <Component id="jButton27" alignment="2" min="-2" pref="216" max="-2" attributes="0"/>
-                          <Component id="jButton28" alignment="2" min="-2" pref="188" max="-2" attributes="0"/>
                           <Component id="jLabel8" alignment="2" min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel20" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="jButton31" alignment="2" min="-2" pref="188" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="0" pref="196" max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="2" attributes="0">
                           <Component id="jButton29" alignment="2" min="-2" pref="216" max="-2" attributes="0"/>
-                          <Component id="jButton30" alignment="2" min="-2" pref="188" max="-2" attributes="0"/>
                           <Component id="jLabel9" alignment="2" min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel19" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="jButton30" alignment="2" min="-2" pref="188" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" pref="129" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace min="-2" pref="414" max="-2" attributes="0"/>
+                      <Component id="jButton28" min="-2" pref="188" max="-2" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace max="32767" attributes="0"/>
+                      <EmptySpace pref="62" max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="jLabel19" alignment="1" min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel20" alignment="1" min="-2" max="-2" attributes="0"/>
@@ -377,17 +382,18 @@
                       <EmptySpace min="-2" pref="47" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
-                              <Component id="jButton27" min="-2" pref="43" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
-                              <Component id="jButton28" min="-2" pref="43" max="-2" attributes="0"/>
-                          </Group>
-                          <Group type="102" alignment="0" attributes="0">
                               <Component id="jButton29" min="-2" pref="43" max="-2" attributes="0"/>
                               <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
-                              <Component id="jButton30" min="-2" pref="43" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="jButton30" alignment="3" min="-2" pref="43" max="-2" attributes="0"/>
+                                  <Component id="jButton31" alignment="3" min="-2" pref="43" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
+                          <Component id="jButton27" alignment="0" min="-2" pref="43" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace min="-2" pref="86" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="28" max="-2" attributes="0"/>
+                      <Component id="jButton28" min="-2" pref="43" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -434,7 +440,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="SansSerif" size="18" style="3"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Barang Digunakan"/>
+                <Property name="text" type="java.lang.String" value="Repair Barang"/>
                 <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                   <Border info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
                     <LineBorder/>
@@ -509,6 +515,25 @@
                 <Property name="text" type="java.lang.String" value="B A R A N G"/>
                 <Property name="toolTipText" type="java.lang.String" value=""/>
               </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="jButton31">
+              <Properties>
+                <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                  <Color blue="2a" green="c8" red="fb" type="rgb"/>
+                </Property>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="SansSerif" size="18" style="3"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Barang Digunakan"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
+                    <LineBorder/>
+                  </Border>
+                </Property>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton31ActionPerformed"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
