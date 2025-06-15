@@ -1,6 +1,7 @@
 package UI;
 
 import Custom.CustomCalendarPanel;
+import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.RoundRectangle2D;
@@ -17,8 +18,11 @@ public class MenuJadwal extends javax.swing.JFrame {
         
         // 2. Panggil initComponents yang akan menempatkan komponen-komponen tersebut
         initComponents();
-        
-        // 3. Atur properti frame setelah komponen diinisialisasi
+        setSize(1320, 720); // Tetapkan ukuran tetap
+        setMinimumSize(new Dimension(1320, 720));
+        setMaximumSize(new Dimension(1320, 720));
+        setPreferredSize(new Dimension(1320, 720));
+        setResizable(false);
         setLocationRelativeTo(null);
         
         // 4. Tambahkan listener untuk refresh data
@@ -300,17 +304,17 @@ public class MenuJadwal extends javax.swing.JFrame {
     }                                         
 
     private void jButton32ActionPerformed(java.awt.event.ActionEvent evt) {                                          
-        new MenuInventaris().setVisible(true);
+        new MenuInventarisBaru().setVisible(true);
         this.dispose();
     }                                         
 
     private void jButton34ActionPerformed(java.awt.event.ActionEvent evt) {                                          
-        new MenuGaji().setVisible(true);
+        new MenuGajiBaru().setVisible(true);
         this.dispose();
     }                                         
 
     private void jButton33ActionPerformed(java.awt.event.ActionEvent evt) {                                          
-        new DaftarKaryawan().setVisible(true);
+        new DaftarKaryawanBaru().setVisible(true);
         this.dispose();
     }                                         
 

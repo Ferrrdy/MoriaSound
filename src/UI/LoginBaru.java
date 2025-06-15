@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package UI;
+import java.awt.Dimension;
 import java.awt.geom.RoundRectangle2D;
 
 
@@ -17,6 +18,11 @@ public class LoginBaru extends javax.swing.JFrame {
      */
     public LoginBaru() {
         initComponents();
+        setSize(1320, 720); // Tetapkan ukuran tetap
+        setMinimumSize(new Dimension(1320, 720));
+        setMaximumSize(new Dimension(1320, 720));
+        setPreferredSize(new Dimension(1320, 720));
+        setResizable(false);
         setLocationRelativeTo(null);
         setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 50, 50));
 

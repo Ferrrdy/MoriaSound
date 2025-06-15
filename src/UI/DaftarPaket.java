@@ -46,11 +46,12 @@ public class DaftarPaket extends javax.swing.JFrame {
     public DaftarPaket() {
         initComponents();
         setLocationRelativeTo(null);
-        try {
-            setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 50, 50));
-        } catch (Exception e) {
-            System.err.println("Error setting shape: " + e.getMessage());
-        }
+        setSize(1320, 720); // Tetapkan ukuran tetap
+        setMinimumSize(new Dimension(1320, 720));
+        setMaximumSize(new Dimension(1320, 720));
+        setPreferredSize(new Dimension(1320, 720));
+        setResizable(false);
+        setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 50, 50));
         setupPanelDaftarPaket();
         muatDanTampilkanPaketDariUIDenganDB();
     }
@@ -142,6 +143,7 @@ public class DaftarPaket extends javax.swing.JFrame {
     }
     
     // INI ADALAH KODE TAMPILAN YANG DITULIS ULANG TANPA DEPENDENSI NETBEANS
+    
     private void initComponents() {
         mainPanel = new JPanel(new BorderLayout());
         navPanel = new RoundedPanel();
@@ -290,49 +292,54 @@ public class DaftarPaket extends javax.swing.JFrame {
 
 // --- GANTI BLOK EVENT HANDLER LAMA ANDA DENGAN YANG INI ---
 
-private void formMousePressed(java.awt.event.MouseEvent evt) { 
-    xMouse = evt.getX(); 
-    yMouse = evt.getY(); 
-}
+private void jLabel9MouseClicked(java.awt.event.MouseEvent evt) {                                     
+        BerandaBaru menu = new BerandaBaru();
+        menu.setVisible(true);
+        this.dispose();
+    }                                    
 
-private void formMouseDragged(java.awt.event.MouseEvent evt) { 
-    this.setLocation(evt.getXOnScreen() - xMouse, evt.getYOnScreen() - yMouse); 
-}
+    private void jButton35ActionPerformed(java.awt.event.ActionEvent evt) {                                          
+        MenuJadwal jadwal = new MenuJadwal();
+        jadwal.setVisible(true);
+        this.dispose();
+    }                                         
 
-private void jLabel9MouseClicked(java.awt.event.MouseEvent evt) { 
-    // Ganti BerandaBaru jika nama kelas frame Beranda Anda berbeda
-    // new BerandaBaru().setVisible(true); 
-    this.dispose(); 
-}
+    private void jButton36ActionPerformed(java.awt.event.ActionEvent evt) {                                          
+        DaftarPaket paket = new DaftarPaket();
+        paket.setVisible(true);
+        this.dispose();
+    }                                         
 
-private void jButton35ActionPerformed(java.awt.event.ActionEvent evt) { 
-    new MenuJadwal().setVisible(true); // Buka frame MenuJadwal
-    this.dispose(); 
-}
+    private void jButton37ActionPerformed(java.awt.event.ActionEvent evt) {                                          
+        MenuInventarisBaru inventaris = new MenuInventarisBaru();
+        inventaris.setVisible(true);
+        this.dispose();
+    }                                         
 
-private void jButton36ActionPerformed(java.awt.event.ActionEvent evt) { 
-    // Tidak melakukan apa-apa, karena sudah di halaman ini.
-}
+    private void jButton38ActionPerformed(java.awt.event.ActionEvent evt) {                                          
+        DaftarKaryawanBaru crew = new DaftarKaryawanBaru();
+        crew.setVisible(true);
+        this.dispose();
+    }                                         
 
-private void jButton37ActionPerformed(java.awt.event.ActionEvent evt) { 
-    new MenuInventaris().setVisible(true); // Buka frame MenuInventaris
-    this.dispose(); 
-}
+    private void jButton39ActionPerformed(java.awt.event.ActionEvent evt) {                                          
+        MenuGajiBaru gaji = new MenuGajiBaru();
+        gaji.setVisible(true);
+        this.dispose();
+    }                                         
 
-private void jButton38ActionPerformed(java.awt.event.ActionEvent evt) { 
-    new DaftarKaryawan().setVisible(true); // Buka frame DaftarKaryawan
-    this.dispose(); 
-}
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {                                         
+        System.exit(0);
+    }                                        
 
-private void jButton39ActionPerformed(java.awt.event.ActionEvent evt) { 
-    new MenuGaji().setVisible(true); // Buka frame MenuGaji
-    this.dispose(); 
-}
+    private void formMousePressed(java.awt.event.MouseEvent evt) {                                  
+        xMouse = evt.getX();
+    yMouse = evt.getY();
+    }                                 
 
-private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) { 
-    // Tombol Close 'X'
-    System.exit(0); 
-}
+    private void formMouseDragged(java.awt.event.MouseEvent evt) {                                  
+        this.setLocation(evt.getXOnScreen() - xMouse, evt.getYOnScreen() - yMouse);
+    }
 
 private void btnTambahPaketActionPerformed(java.awt.event.ActionEvent evt) { 
     // Tombol Tambah Paket

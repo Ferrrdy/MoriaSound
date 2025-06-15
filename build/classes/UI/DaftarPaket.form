@@ -78,15 +78,10 @@
                       <Group type="102" attributes="0">
                           <EmptySpace min="-2" pref="19" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="jButton2" min="-2" pref="45" max="-2" attributes="0"/>
-                                  <EmptySpace min="-2" pref="45" max="-2" attributes="0"/>
-                              </Group>
-                              <Group type="102" attributes="0">
-                                  <Component id="roundedPanel6" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              </Group>
+                              <Component id="jButton2" alignment="0" min="-2" pref="45" max="-2" attributes="0"/>
+                              <Component id="roundedPanel6" min="-2" max="-2" attributes="0"/>
                           </Group>
+                          <EmptySpace min="-2" pref="45" max="-2" attributes="0"/>
                       </Group>
                       <Group type="102" alignment="1" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
@@ -103,7 +98,7 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Container class="Custom.RoundedPanel" name="roundedPanel3">
+        <Container class="org.netbeans.modules.form.InvalidComponent" name="roundedPanel3">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="7c" green="7c" red="7c" type="rgb"/>
@@ -125,7 +120,7 @@
             </DimensionLayout>
           </Layout>
         </Container>
-        <Container class="Custom.RoundedPanel" name="roundedPanel9">
+        <Container class="org.netbeans.modules.form.InvalidComponent" name="roundedPanel9">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="37" green="33" red="2e" type="rgb"/>
@@ -282,7 +277,7 @@
             </Component>
           </SubComponents>
         </Container>
-        <Container class="Custom.RoundedPanel" name="roundedPanel6">
+        <Container class="org.netbeans.modules.form.InvalidComponent" name="roundedPanel6">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="37" green="33" red="2e" type="rgb"/>

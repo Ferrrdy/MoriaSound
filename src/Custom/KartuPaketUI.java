@@ -2,8 +2,9 @@ package Custom;
 
 import DataBase.DbConnection;
 import UI.DaftarPaket;
+import UI.DaftarPaketBaru;
 import UI.FormPaket;
-
+import UI.FormPaketBaru;
 import javax.swing.*;
 import java.awt.*;
 import java.sql.Connection;
@@ -18,9 +19,9 @@ public class KartuPaketUI extends JPanel {
     private JButton btnEdit;
     private JButton btnHapus;
     private InfoPaketSound dataInfoPaketSound;
-    private DaftarPaket parentFrame; // Referensi ke frame utama
+    private DaftarPaketBaru parentFrame; // Referensi ke frame utama
 
-    public KartuPaketUI(DaftarPaket parent, InfoPaketSound infoPaket) {
+    public KartuPaketUI(DaftarPaketBaru parent, InfoPaketSound infoPaket) {
         this.parentFrame = parent;
         this.dataInfoPaketSound = infoPaket;
         initComponents();
@@ -65,7 +66,7 @@ public class KartuPaketUI extends JPanel {
         add(panelBawah, BorderLayout.SOUTH);
 
         btnEdit.addActionListener(e -> {
-            FormPaket formEdit = new FormPaket(parentFrame, dataInfoPaketSound.getIdPaket());
+            FormPaketBaru formEdit = new FormPaketBaru(parentFrame, dataInfoPaketSound.getIdPaket());
             formEdit.setVisible(true);
         });
 

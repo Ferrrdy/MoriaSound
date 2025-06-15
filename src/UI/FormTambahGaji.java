@@ -28,9 +28,9 @@ public class FormTambahGaji extends JDialog {
     private JButton btnBatal;
 
     private GajiController gajiController;
-    private MenuGaji parentMenu;
+    private MenuGajiBaru parentMenu;
 
-    public FormTambahGaji(Frame parent, boolean modal, MenuGaji parentMenu) {
+    public FormTambahGaji(Frame parent, boolean modal, MenuGajiBaru parentMenu) {
         super(parent, "Tambah Data Gaji Baru", modal);
         this.gajiController = new GajiController();
         this.parentMenu = parentMenu;
@@ -174,3 +174,4 @@ public class FormTambahGaji extends JDialog {
         }
     }
 }
+
