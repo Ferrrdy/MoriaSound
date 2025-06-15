@@ -528,7 +528,7 @@ for (int i = 1; i < jTable1.getColumnCount(); i++) {
     }//GEN-LAST:event_jButton30ActionPerformed
 
     private void jButton31ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton31ActionPerformed
-        DaftarPaket paket = new DaftarPaket();
+        DaftarPaketBaru paket = new DaftarPaketBaru();
         paket.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_jButton31ActionPerformed

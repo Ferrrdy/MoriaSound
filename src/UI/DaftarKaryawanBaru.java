@@ -547,7 +547,7 @@ int xMouse, yMouse;
     }//GEN-LAST:event_jButton40ActionPerformed
 
     private void jButton41ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton41ActionPerformed
-        DaftarPaket paket = new DaftarPaket();
+        DaftarPaketBaru paket = new DaftarPaketBaru();
         paket.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_jButton41ActionPerformed

@@ -5,11 +5,15 @@
         <group>
             <file>file:/C:/Users/nabil/OneDrive/Dokumen/NetBeansProjects/MoriaSound/src/UI/MenuJadwal.java</file>
             <file>file:/C:/Users/nabil/OneDrive/Dokumen/NetBeansProjects/MoriaSound/src/UI/DaftarPaketBaru.java</file>
-            <file>file:/C:/Users/nabil/OneDrive/Dokumen/NetBeansProjects/MoriaSound/src/UI/DaftarPaket.java</file>
-            <file>file:/C:/Users/nabil/OneDrive/Dokumen/NetBeansProjects/MoriaSound/src/UI/FormPaket.java</file>
             <file>file:/C:/Users/nabil/OneDrive/Dokumen/NetBeansProjects/MoriaSound/src/UI/FormPaketBaru.java</file>
             <file>file:/C:/Users/nabil/OneDrive/Dokumen/NetBeansProjects/MoriaSound/src/Custom/KartuPaketUI.java</file>
             <file>file:/C:/Users/nabil/OneDrive/Dokumen/NetBeansProjects/MoriaSound/src/UI/BarangDigunakan.java</file>
+            <file>file:/C:/Users/nabil/OneDrive/Dokumen/NetBeansProjects/MoriaSound/src/UI/ArmadaDigunakan.java</file>
+            <file>file:/C:/Users/nabil/OneDrive/Dokumen/NetBeansProjects/MoriaSound/src/UI/DaftarArmada.java</file>
+            <file>file:/C:/Users/nabil/OneDrive/Dokumen/NetBeansProjects/MoriaSound/src/UI/DaftarBarang.java</file>
+            <file>file:/C:/Users/nabil/OneDrive/Dokumen/NetBeansProjects/MoriaSound/src/UI/DaftarKaryawanBaru.java</file>
+            <file>file:/C:/Users/nabil/OneDrive/Dokumen/NetBeansProjects/MoriaSound/src/UI/MenuGajiBaru.java</file>
+            <file>file:/C:/Users/nabil/OneDrive/Dokumen/NetBeansProjects/MoriaSound/src/UI/MenuInventarisBaru.java</file>
         </group>
     </open-files>
 </project-private>

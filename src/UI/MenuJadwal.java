@@ -299,7 +299,7 @@ public class MenuJadwal extends javax.swing.JFrame {
     }                                    
 
     private void jButton31ActionPerformed(java.awt.event.ActionEvent evt) {                                          
-        new DaftarPaket().setVisible(true);
+        new DaftarPaketBaru().setVisible(true);
         this.dispose();
     }                                         
 

@@ -566,7 +566,7 @@ public class DaftarBarang extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton35ActionPerformed
 
     private void jButton36ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton36ActionPerformed
-        DaftarPaket paket = new DaftarPaket();
+        DaftarPaketBaru paket = new DaftarPaketBaru();
         paket.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_jButton36ActionPerformed

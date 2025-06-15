@@ -380,7 +380,7 @@ int xMouse, yMouse;
     }//GEN-LAST:event_jButton21ActionPerformed
 
     private void jButton22ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton22ActionPerformed
-        DaftarPaket paket = new DaftarPaket();
+        DaftarPaketBaru paket = new DaftarPaketBaru();
         paket.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_jButton22ActionPerformed
